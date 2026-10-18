@@ -1,16 +1,19 @@
 # Weft
 
-Weft is the operating system for a D2C brand's drops: one live plan per drop, stored as a FalkorDB graph, with AI teammates that chase the updates and show what every change breaks.
+Weft is one live plan for a D2C brand's products, from planning to restock: each drop is a FalkorDB graph, and AI teammates chase the updates and show what every change breaks.
 
-Small D2C brands miss launches and money for things nobody noticed in time.
-A supplier goes quiet, a delay sits in a chat, a size sells out while the reorder never goes out.
-Each tool sees one slice (Shopify sees orders, WhatsApp holds supplier talk, a spreadsheet holds the production plan), so problems that cross from making to selling stay invisible until a customer or creator notices.
+A D2C product is planned, made, sold and restocked, and each stage lives in a different tool: a spreadsheet for the plan, WhatsApp groups for the factory, Shopify for orders, and the founder's memory for reorders. The failures happen at the joins. A supplier's delay sits in a chat while creators promise the launch date. A size sells out on day four and the reorder waits, because nobody compared sell-through with lead time. The restock lands and the stock count is still wrong. Weft puts every stage on one graph, so a change anywhere shows what it breaks everywhere.
 
 ## Demo
 
-Demo video: [docs/demo/weft-demo.mp4](docs/demo/weft-demo.mp4), a two-minute recording of the Black Drop case study.
+- **Live:** https://weft.kshitijbhardwaj.space (landing page → *Open the live demo*)
+- **Demo login** (also shown on the login page): `founder@blackdrop.in` / `blackdrop`. Signing in starts a guided tour of the major features, each step naming the FalkorDB feature behind it. *Reset demo data* in the tour reseeds the graphs.
+- **Video:** [docs/demo/weft-demo.mp4](docs/demo/weft-demo.mp4)
+- **Blog post:** [docs/blog/weft-falkordb.md](docs/blog/weft-falkordb.md)
 
-Live deployment: runs locally (see setup)
+### Deployment
+
+The public URL is a Cloudflare Worker ([deploy/cloudflare](deploy/cloudflare)) on a custom domain. It proxies to the Next.js server, which runs with its own FalkorDB instance seeded with the demo data, reached through a Cloudflare Tunnel. The Worker keeps the public URL stable; `ORIGIN` in `wrangler.jsonc` points it at the app server.
 
 ## Tracks
 

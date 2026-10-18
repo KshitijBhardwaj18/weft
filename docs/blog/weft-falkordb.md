@@ -4,11 +4,15 @@ Thirteen days before our Black Drop goes live, a message arrives in a WhatsApp g
 
 That is the first failure. The second comes later. The drop launches, the black leggings in size M sell out on day four, and the reorder waits a week because nobody checked sell-through against the supplier's lead time. The third is quieter: when the restock arrives, the stock count in the spreadsheet is still wrong.
 
-![Tools that each see one slice of the drop](assets/01-scattered.gif)
+![Tools that each see one slice of the drop](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/assets/01-scattered.gif)
 
 Weft is what we built for FalkorDB's Graph Hacks: Context for AI Agents hackathon. It keeps one live plan for each product, from the first sample to the next restock, stored as a FalkorDB graph. Three AI teammates work on that plan. This post walks through the full loop on one case study, explains why the plan is a graph, and says plainly what is built and what is not.
 
-**Demo video:** [docs/demo/weft-demo.mp4](../demo/weft-demo.mp4). It is a screen recording of the running app, with captions, from the case study below.
+**Try it live:** https://weft.kshitijbhardwaj.space. Sign in with `founder@blackdrop.in` / `blackdrop` (shown on the login page); a guided tour walks through every feature below and names the FalkorDB feature behind each one.
+
+**Demo video:** https://weft.kshitijbhardwaj.space/weft-demo.mp4
+
+**Code:** https://github.com/KshitijBhardwaj18/weft
 
 ## The problem
 
@@ -56,7 +60,7 @@ The Today screen opens thirteen days before the drop. Production, samples, creat
 
 The supplier's view shows Murugan at Sri Lakshmi only his own POs and check-ins. Shuttle, the production teammate, asks before a date is due: *is the fabric in for PO-014?* Murugan answers in one tap: *Yes, arrived*, or *Delayed*, with a new fabric date.
 
-![Shuttle's check-in on PO-014 in the supplier's view](screens/checkin.png)
+![Shuttle's check-in on PO-014 in the supplier's view](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/checkin.png)
 
 That answer is a fact on the graph, and it raises a delay call. Weft walks the impact in one query: from the PO, through its SKUs and style, to the drop, and back in through every creator post that promises the drop date.
 
@@ -71,7 +75,7 @@ RETURN po.id AS po, sup.name AS supplier, collect(DISTINCT k.code) AS skus, s.na
 
 In the demo, the fabric lands four days late, on 5 December, and three creator posts announcing 1 December would break.
 
-![A delay pulse travelling from the supplier to the creators](assets/02-ripple.gif)
+![A delay pulse travelling from the supplier to the creators](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/assets/02-ripple.gif)
 
 ### 3. Scenario: test the change before making it
 
@@ -88,13 +92,13 @@ The comparison asks the same question of both graphs:
 
 *Apply to plan* copies the scenario over the plan, records the decision with who made it and when, and deletes the scenario graph.
 
-![Copying the plan, re-pointing the PO, and applying the copy back](assets/03-scenario.gif)
+![Copying the plan, re-pointing the PO, and applying the copy back](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/assets/03-scenario.gif)
 
 ### 4. Sell: day nine of the drop
 
 Switch the clock to Live. Sixty-two percent of the 2,100 units have sold, 1,307 in total. The sell-through heatmap shows black leggings in size M sold out on day four. Revenue, returns and creator ranking come from the same graph.
 
-![Today in Live, day nine: 62 percent sold and the sell-through heatmap](screens/sell-day9.png)
+![Today in Live, day nine: 62 percent sold and the sell-through heatmap](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/sell-day9.png)
 
 Creators rank by the orders on their code, with their repeat rate, so the next drop's creator choice starts from evidence.
 
@@ -111,7 +115,7 @@ shown    = qty > 0 and days of stock left (onHand / rate) < 7
 
 `incoming` is the quantity on POs that have not been received yet. Before this change, the formula ignored open POs, so an approved restock still looked needed. Now an approved restock covers its SKU, and it drops off *Restock now*.
 
-![After approval, the restock leaves Restock now](screens/restock-closed.png)
+![After approval, the restock leaves Restock now](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/restock-closed.png)
 
 Approving the call writes a new PO with a unique id, priced from that SKU's last PO, and notifies the supplier when email or WhatsApp is configured. When the goods arrive, *Mark received* adds the PO's quantity to stock, split evenly across the SKUs the PO supplies. The black leggings in size M go from 0 on hand to 340.
 
@@ -124,7 +128,7 @@ WITH DISTINCT po
 SET po.stage = 'Received', po.status = 'received'
 ```
 
-![The Drop page after receipt: black leggings M on hand 340](screens/stock-received.png)
+![The Drop page after receipt: black leggings M on hand 340](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/stock-received.png)
 
 Sold, reordered, received. The stock on the Drop page is the same stock the next restock calculation reads.
 
@@ -136,7 +140,7 @@ Three kinds of connection make the loop work. Each one writes to the same graph.
 - **The graph.** One FalkorDB instance holds the live plan (`weft`), the day-nine snapshot (`weft_live`), workspace settings (`weft_meta`) and a copy for each scenario. Messages, decisions and calls each point back to the message or check-in they came from.
 - **Teammates out.** Weft (chief of staff), Shuttle (production) and Pattern (sales) are one Claude model with one tool, `run_cypher`. It runs through `GRAPH.RO_QUERY`, so a teammate can read the plan and cannot write to it. A teammate proposes a change as a call, and an Owner or Manager decides it. Every query a teammate runs is listed under *See why*, next to the answer.
 
-![Ask a teammate, and See why shows the queries behind the answer](screens/ask-see-why.png)
+![Ask a teammate, and See why shows the queries behind the answer](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/ask-see-why.png)
 
 ## Why the plan is a graph
 
@@ -183,6 +187,9 @@ pnpm seed                            # builds the demo graphs
 pnpm dev                             # open http://localhost:3000
 ```
 
-The demo script, with the steps for the video, is in [docs/DEMO.md](../DEMO.md).
+The demo script, with the steps for the video, is in [docs/DEMO.md](https://github.com/KshitijBhardwaj18/weft/blob/main/docs/DEMO.md).
 
-Code: https://github.com/KshitijBhardwaj18/weft
+Weft was built for FalkorDB Graph Hacks, with Claude Code as a pair programmer.
+
+- Live demo: https://weft.kshitijbhardwaj.space
+- Code: https://github.com/KshitijBhardwaj18/weft
