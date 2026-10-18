@@ -27,9 +27,9 @@ Edges:
 |---|---|
 | Multi-hop Cypher | Delay impact: PO → SKU → Style → Drop ← CreatorPost ← Creator |
 | `GRAPH.COPY` + multiple graphs | Scenarios; the Live snapshot; Apply to plan swaps the scenario graph in |
-| Shortest path | See why paths between an answer's nodes |
+| Bounded variable-length paths | See why paths between an answer's nodes (FalkorDB shortestPath is directed-only) |
 | Graph algorithms | PageRank over supply edges → "single points of failure" on Today |
-| Full-text index | ⌘K search over SKUs, styles, suppliers, POs |
+| Full-text index | Brand map search over SKUs, styles, suppliers, POs, creators |
 | Aggregations | Sell-through heatmap, revenue, restock suggestions |
 | Agent tool over Cypher | Weft / Shuttle / Pattern answer by querying the graph; queries are shown in See why |
 
