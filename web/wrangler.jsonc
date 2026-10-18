@@ -1,11 +1,18 @@
 {
   // Weft on Cloudflare Workers (OpenNext). FalkorDB runs on FalkorDB Cloud; set FALKORDB_URL,
-  // ANTHROPIC_API_KEY and SESSION_SECRET with `wrangler secret put`.
-  "name": "weft",
+  // ANTHROPIC_API_KEY and SESSION_SECRET with `wrangler secret put` (per environment).
+  // Default target is the preview Worker on workers.dev; `--env production` serves weft.kshitijbhardwaj.space.
+  "name": "weft-next",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
-  "routes": [{ "pattern": "weft.kshitijbhardwaj.space", "custom_domain": true }],
-  "observability": { "enabled": true }
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "env": {
+    "production": {
+      "name": "weft",
+      "routes": [{ "pattern": "weft.kshitijbhardwaj.space", "custom_domain": true }]
+    }
+  }
 }

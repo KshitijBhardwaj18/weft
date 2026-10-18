@@ -9,7 +9,8 @@
     "lint": "eslint",
     "seed": "node --env-file-if-exists=.env.local scripts/seed.mjs",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "deploy:production": "opennextjs-cloudflare build && opennextjs-cloudflare deploy -- --env production"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
