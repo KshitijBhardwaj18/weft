@@ -144,7 +144,7 @@ async function build(name, phase) {
     await run(`
       MATCH (p:Teammate {id:'pattern'}), (sku:SKU {id:'LEG-BLK-M'})
       CREATE (c:Call {id:'call-restock-legblkm', kind:'restock', status:'open', at:'2026-12-10T09:12',
-                      title:'Drafted a restock', summary:'Black leggings M sold out on day 4. Restock from Sri Lakshmi Knits, 14-day lead time.'})-[:ABOUT]->(sku),
+                      title:'Drafted a restock', summary:'Black leggings M sold out on day 4. Restock from Kavya Garments, who made this batch (10-day lead time).'})-[:ABOUT]->(sku),
              (c)-[:RAISED_BY]->(p)`);
     await run(`
       MATCH (s:Teammate {id:'shuttle'}), (po:PO {id:'PO-018'})

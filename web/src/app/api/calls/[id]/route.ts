@@ -1,5 +1,5 @@
 import { q } from "@/lib/graph";
-import { activeGraph, restocks } from "@/lib/plan";
+import { activeGraph, drop, restocks } from "@/lib/plan";
 
 // An Owner/Manager decides on a call. Applying writes the decision into the plan.
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -28,13 +28,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   } else if (call.kind === "restock") {
     const r = (await restocks(10)).find((x) => x.id === call.about);
+    const today = (await drop(g)).today;
+    const eta = new Date(Date.parse(today) + (r?.leadDays ?? 14) * 86_400_000).toISOString().slice(0, 10);
     await q(
       `MATCH (c:Call {id:$id})-[:ABOUT]->(k:SKU), (sup:Supplier {name:$supplier}), (owner:Person {id:'rohan'})
        SET c.status = 'applied'
-       CREATE (po:PO {id:'PO-022', qty:$qty, unitPrice:420, eta:'2026-12-24', stage:'Fabric', status:'sent'})-[:SUPPLIES]->(k),
+       CREATE (po:PO {id:'PO-022', qty:$qty, unitPrice:420, eta:$eta, stage:'Fabric', status:'sent'})-[:SUPPLIES]->(k),
               (po)-[:MADE_BY]->(sup), (owner)-[:OWNS]->(po),
               (owner)-[:DECIDED]->(:Decision {id:'d-' + $id, text:'Approved restock PO-022 for ' + k.id, at:$at, by:'Rohan'})-[:ABOUT]->(po)`,
-      { id, supplier: r?.supplier ?? "Sri Lakshmi Knits", qty: r?.qty ?? 250, at: new Date().toISOString() },
+      { id, supplier: r?.supplier ?? "Kavya Garments", qty: r?.qty ?? 340, eta, at: new Date().toISOString() },
       g,
     );
   } else if (call.kind === "followup") {

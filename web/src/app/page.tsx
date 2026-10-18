@@ -22,7 +22,7 @@ export default async function Today() {
   const [calls, quiet, risk, allPos] = await Promise.all([openCalls(), quietCheckIns(), supplierRisk(), pos()]);
   const live = p === "live";
   const days = daysBetween(d.today, d.date);
-  const dayOfDrop = daysBetween(d.date, d.today) + 1;
+  const dayOfDrop = daysBetween(d.date, d.today);
 
   const [t, heat, top, rs] = live ? await Promise.all([totals(), heatmap(), creators(), restocks()]) : [null, [], [], []];
   const onTrack = allPos.filter((x) => !x.pending && x.eta <= d.date).length;
