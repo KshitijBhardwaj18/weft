@@ -144,7 +144,7 @@ async function build(name, phase) {
     await run(`
       MATCH (p:Teammate {id:'pattern'}), (sku:SKU {id:'LEG-BLK-M'})
       CREATE (c:Call {id:'call-restock-legblkm', kind:'restock', status:'open', at:'2026-12-10T09:12',
-                      title:'Pattern drafted a restock', summary:'Black leggings M sold out on day 4. Restock from Sri Lakshmi Knits, 14-day lead time.'})-[:ABOUT]->(sku),
+                      title:'Drafted a restock', summary:'Black leggings M sold out on day 4. Restock from Sri Lakshmi Knits, 14-day lead time.'})-[:ABOUT]->(sku),
              (c)-[:RAISED_BY]->(p)`);
     await run(`
       MATCH (s:Teammate {id:'shuttle'}), (po:PO {id:'PO-018'})
@@ -161,7 +161,7 @@ async function build(name, phase) {
     await run(`
       MATCH (s:Teammate {id:'shuttle'}), (ci:CheckIn {id:'ci-po019-labdip'})
       CREATE (c:Call {id:'call-followup-ananya', kind:'followup', status:'open', at:'2026-11-18T09:00',
-                      title:'Shuttle drafted a follow-up', summary:'To Ananya Fabrics: the olive lab dip was due 15 Nov. Any update?'})-[:ABOUT]->(ci),
+                      title:'Drafted a follow-up to Ananya', summary:'To Ananya Fabrics: the olive lab dip was due 15 Nov. Any update?'})-[:ABOUT]->(ci),
              (c)-[:RAISED_BY]->(s)`);
   }
 
