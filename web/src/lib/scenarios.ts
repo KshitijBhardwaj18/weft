@@ -61,7 +61,7 @@ export async function sideOf(graph: string, po: string, withPendingDelay: boolea
 
 /** Apply to plan: the scenario graph becomes the plan (GRAPH.COPY over it), and the decision is recorded. */
 export async function applyScenario(id: string) {
-  const [s] = await ro<Scenario>("MATCH (s:Scenario {id:$id}) RETURN s.graph AS graph, s.base AS base, s.po AS po, s.toName AS toName", { id }, META);
+  const [s] = await ro<Scenario>("MATCH (s:Scenario {id:$id}) RETURN s.graph AS graph, s.base AS base, s.po AS po, s.to AS to, s.toName AS toName", { id }, META);
   if (!s) throw new Error("Unknown scenario");
   await copyGraph(s.graph, s.base);
   await q(
@@ -73,6 +73,7 @@ export async function applyScenario(id: string) {
   );
   await deleteGraph(s.graph);
   await q("MATCH (s:Scenario {id:$id}) SET s.status = 'applied'", { id }, META);
+  return s;
 }
 
 export async function discardScenario(id: string) {

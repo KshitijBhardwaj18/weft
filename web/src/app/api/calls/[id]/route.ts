@@ -1,10 +1,14 @@
+import { after } from "next/server";
 import { q } from "@/lib/graph";
+import { notifySupplier } from "@/lib/integrations/notify";
+import { canDecide } from "@/lib/roles";
 import { activeGraph, drop, restocks } from "@/lib/plan";
 
 // An Owner/Manager decides on a call. Applying writes the decision into the plan.
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { action } = (await req.json()) as { action: "apply" | "ignore" };
+  if (!(await canDecide())) return Response.json({ error: "Waiting for an Owner or Manager." }, { status: 403 });
   const g = await activeGraph();
   const [call] = await q<{ kind: string; newEta: string | null; about: string | null }>(
     "MATCH (c:Call {id:$id}) OPTIONAL MATCH (c)-[:ABOUT]->(a) RETURN c.kind AS kind, c.newEta AS newEta, a.id AS about",
@@ -39,8 +43,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       { id, supplier: r?.supplier ?? "Kavya Garments", qty: r?.qty ?? 340, eta, at: new Date().toISOString() },
       g,
     );
+    const [sup] = await q<{ id: string }>("MATCH (:PO {id:'PO-022'})-[:MADE_BY]->(s:Supplier) RETURN s.id AS id", {}, g);
+    if (sup) after(() => notifySupplier(sup.id, { kind: "po", poId: "PO-022" }));
   } else if (call.kind === "followup") {
     await q("MATCH (c:Call {id:$id})-[:ABOUT]->(ci:CheckIn) SET c.status = 'applied', ci.status = 'chased'", { id }, g);
+    const [ci] = await q<{ ci: string; sid: string }>("MATCH (c:Call {id:$id})-[:ABOUT]->(ci:CheckIn)-[:ASKED]->(s:Supplier) RETURN ci.id AS ci, s.id AS sid", { id }, g);
+    if (ci) after(() => notifySupplier(ci.sid, { kind: "checkin", checkInId: ci.ci }));
   } else {
     await q("MATCH (c:Call {id:$id}) SET c.status = 'applied'", { id }, g);
   }
