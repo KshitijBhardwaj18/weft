@@ -1,0 +1,134 @@
+[
+[
+1.4,
+"Plan",
+"Thirteen days to launch",
+"Today shows the whole brand in one live plan: 15 SKUs, 5 factory orders, 3 suppliers and 3 creators. Three AI teammates work on it."
+],
+[
+8.2,
+"Plan",
+"Every order, live",
+"Production tracks every factory order from fabric to warehouse. Cards move as suppliers answer."
+],
+[
+14.3,
+"Talk",
+"Talk where the work happens",
+"Suppliers, the team and three AI teammates share one set of conversations, and every message becomes part of the plan."
+],
+[
+18.089000000000002,
+"Talk",
+"A supplier writes, the plan updates",
+"Murugan types an update the way he always would: \"Cutting done for PO-017\". Shuttle reads it and moves the order forward on its own."
+],
+[
+27.416,
+"Talk",
+"No one retyped anything",
+"PO-017 is already in Stitching on the production board, linked back to Murugan's message."
+],
+[
+33.153999999999996,
+"Talk",
+"Chat with a teammate",
+"Ask Shuttle anything about production. It answers from the live plan, and See why shows exactly how."
+],
+[
+54.105999999999995,
+"Talk",
+"Mention a teammate in any thread",
+"In #ops, the team tags @weft and gets an answer in place, without leaving the conversation."
+],
+[
+73.633,
+"Make",
+"A supplier slips",
+"Suppliers get their own view: only their orders, and Shuttle's check-ins before anything is due."
+],
+[
+80.833,
+"Make",
+"One tap, not a lost message",
+"Murugan answers: the fabric is delayed to 28 Nov. It lands on the plan as a fact, not a chat."
+],
+[
+85.93299999999999,
+"Make",
+"The impact, traced",
+"Shuttle walks the plan from the factory order to the launch and every creator post promising it. 4 days late. 3 posts break."
+],
+[
+92.633,
+"Decide",
+"Test it first",
+"A scenario copies the whole plan into a private sandbox. The change happens only in the copy."
+],
+[
+97.43299999999999,
+"Decide",
+"Two futures, side by side",
+"Stay and launch late, or move to Kavya and land on time with every post intact, for ₹12,000 more."
+],
+[
+104.833,
+"Decide",
+"Decided, and remembered",
+"The order moves to Kavya. The decision is recorded with who made it and why."
+],
+[
+112.133,
+"Sell",
+"Nine days after launch",
+"62% sold, ₹27.4L in revenue. Orders, returns and creator codes flow in from the shop."
+],
+[
+117.633,
+"Sell",
+"What's selling, by size",
+"Black leggings M sold out on day 4. The olive tank is slow, and coming back \"too short\"."
+],
+[
+124.733,
+"Sell",
+"Every product's lifeline",
+"Who made it, planned, sold, on hand, returns, and the fit note behind them. One row per product."
+],
+[
+130.333,
+"Sell",
+"Ask the sales analyst",
+"Pattern answers from the live plan: what's selling, what's running out, which creators bring repeat buyers, and what to do next."
+],
+[
+163.13299999999998,
+"Restock",
+"Reorder before it hurts",
+"Pattern drafted it: 33 a day × 10-day lead time − 0 on hand = 340. One approval sends the order to Kavya."
+],
+[
+171.233,
+"Restock",
+"Tracked to the door",
+"The new order sits on the production board. When the boxes arrive, mark it received."
+],
+[
+178.433,
+"Restock",
+"Back on the shelf",
+"340 on hand, on the same product that sold out. Sold, reordered, received."
+],
+[
+184.933,
+"Learn",
+"Nothing decided is lost",
+"Ask why, months later. Weft finds the decision and the messages behind it, and shows where every answer came from."
+],
+[
+210.833,
+"Learn",
+"The whole brand, connected",
+"Every product, supplier, order, creator and decision, as one graph."
+]
+]

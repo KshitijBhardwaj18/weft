@@ -1,0 +1,31 @@
+[
+ {
+  "t": 1.287,
+  "title": "Talk where the work happens",
+  "body": "Suppliers, the team and the AI teammates share one set of conversations, and every message is part of the plan."
+ },
+ {
+  "t": 3.789,
+  "title": "A supplier writes, the plan updates",
+  "body": "Murugan types an update the way he always would. Shuttle reads it and moves the order forward on its own, quoting the message."
+ },
+ {
+  "t": 13.116,
+  "title": "No one retyped anything",
+  "body": "PO-017 is already in Stitching on the production board, linked back to Murugan's message."
+ },
+ {
+  "t": 18.854,
+  "title": "Chat with a teammate",
+  "body": "Ask Shuttle anything about production. It answers from the live plan, and See why shows how."
+ },
+ {
+  "t": 39.806,
+  "title": "Mention a teammate in any thread",
+  "body": "In #ops, the team tags @weft and gets an answer in place, without leaving the conversation."
+ },
+ {
+  "t": 59.333,
+  "end": true
+ }
+]
