@@ -1,10 +1,12 @@
 import { bus, type ChatMessage } from "@/lib/chat";
+import { physical } from "@/lib/graph";
 
 export const dynamic = "force-dynamic";
 
 // Server-Sent Events: every message posted to this channel is pushed to open clients in real time.
 export async function GET(req: Request, { params }: { params: Promise<{ channel: string }> }) {
-  const { channel } = await params;
+  const { channel: id } = await params;
+  const channel = await physical(id); // one bus key per workspace and channel
   const enc = new TextEncoder();
   let cleanup = () => {};
 
