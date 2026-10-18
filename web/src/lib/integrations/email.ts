@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { supplierLink } from "@/lib/supplier-access";
 import { ro } from "../graph";
 import { activeGraph, checkInsFor, pos } from "../plan";
 
@@ -76,7 +77,7 @@ export async function sendPoEmail(supplierId: string, poId: string): Promise<Sen
     if (!sup) return { error: `Unknown supplier ${supplierId}` };
     if (!po) return { error: `Unknown PO ${poId}` };
     if (!sup.email) return skip(`${sup.name} has no email`);
-    const url = `${appUrl()}/supplier/${supplierId}`;
+    const url = await supplierLink(appUrl(), supplierId);
     const due = fmtDate(po.eta);
     const html = layout(
       `Hi ${esc(sup.contact)}, here is ${po.id}`,
@@ -99,8 +100,8 @@ export async function sendCheckInEmail(supplierId: string, checkInId: string): P
     if (!sup) return { error: `Unknown supplier ${supplierId}` };
     if (!ci) return { error: `Unknown check-in ${checkInId}` };
     if (!sup.email) return skip(`${sup.name} has no email`);
-    const url = `${appUrl()}/supplier/${supplierId}`;
-    const yes = `${url}?checkin=${ci.id}&answer=yes`;
+    const url = await supplierLink(appUrl(), supplierId);
+    const yes = `${url}&checkin=${ci.id}&answer=yes`;
     const html = layout(
       `Hi ${esc(sup.contact)}, a quick check`,
       `<p>${esc(ci.question)}</p><p style="color:#555">Due ${fmtDate(ci.due)}</p>` +
