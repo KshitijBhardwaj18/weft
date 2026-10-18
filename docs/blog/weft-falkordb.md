@@ -7,7 +7,9 @@ Running a D2C brand means running a hundred small loops at once. A collection ge
 Weft is the company harness for D2C brands. It keeps one live plan of everything the brand makes and sells: products, suppliers, factory orders, stock, orders, creators and decisions, connected in a FalkorDB graph. Three AI teammates work on that plan all day, chasing updates and showing what every change breaks. The founder makes the calls.
 
 **See it live:** [weft.kshitijbhardwaj.space](https://weft.kshitijbhardwaj.space). Sign in with `founder@blackdrop.in` / `blackdrop`, and a guided tour walks you through the whole loop.
-**Watch the demo:** [end to end, in under four minutes](https://weft.kshitijbhardwaj.space/weft-demo.mp4)
+**Watch the demo:** [the full story, end to end](https://weft.kshitijbhardwaj.space/weft-demo.mp4)
+
+![The demo: the story on the left, the product on the right](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/demo-split.png)
 
 ## Meet the brand
 
@@ -55,9 +57,25 @@ Weft comes with three AI teammates who work on the plan.
 - **Shuttle**, the production lead, checks in with suppliers before dates are due, reads their messages, and turns a slip into a call with its impact attached.
 - **Pattern**, the sales analyst, watches sell-through and returns, spots sell-outs, drafts reorders from lead times, and ranks creators by the orders their codes drive.
 
-The teammates read the plan; they never change it on their own. When something needs a decision, they raise a call, and an Owner or Manager decides. Every answer comes with *See why*: the exact queries behind it, so nothing is a black box.
+You can talk to them like teammates: in their own chat, or by mentioning them in any thread. The teammates read the plan; they never change it on their own. When something needs a decision, they raise a call, and an Owner or Manager decides. Every answer comes with *See why*: the exact queries behind it, so nothing is a black box.
 
 ## The same launch, run on Weft
+
+### Talk: every conversation is part of the plan
+
+Weft is where the brand talks. Each supplier has a chat, the team has its channels, and each AI teammate has its own thread. Messages are not a side channel next to the plan. They are part of it.
+
+When Murugan types "Cutting done for the olive leggings PO-017", the way he always would, Shuttle reads it and moves the order to Stitching on its own, linked back to his message. Nobody retypes anything into a tracker.
+
+![A supplier's message moves the order forward on its own](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/chat-supplier.png)
+
+Kshitij can open Shuttle's thread and ask, in plain words, which factory orders could still put the launch at risk. Shuttle answers from the live plan, names the orders, and shows the queries behind the answer.
+
+![Chatting with Shuttle, the production lead](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/chat-shuttle.png)
+
+And in any team thread, tagging `@weft`, `@shuttle` or `@pattern` gets an answer in place, without leaving the conversation.
+
+![Mentioning @weft in the #ops channel](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/chat-ops.png)
 
 ### Make: the supplier slips, and the plan knows in seconds
 
