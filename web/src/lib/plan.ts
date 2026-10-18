@@ -16,15 +16,37 @@ export async function setPhase(p: Phase) {
   await q("MERGE (s:Setting {key:'phase'}) SET s.value = $p", { p }, META);
 }
 
-export type Drop = { id: string; name: string; date: string; today: string; orders: number };
-export async function drop(graph?: string): Promise<Drop> {
+export type Drop = { id: string; name: string; date: string; today: string; orders: number; status: string };
+/** The collection in focus (the earliest one not still being planned), or the one with this id. */
+export async function drop(graph?: string, id?: string): Promise<Drop> {
   const g = graph ?? (await activeGraph());
   const [d] = await ro<Drop>(
-    "MATCH (d:Drop) RETURN d.id AS id, d.name AS name, d.date AS date, d.today AS today, d.orders AS orders",
-    {},
+    `MATCH (d:Drop) WHERE ($id IS NULL AND coalesce(d.status, 'active') <> 'planning') OR d.id = $id
+     RETURN d.id AS id, d.name AS name, d.date AS date, d.today AS today, coalesce(d.orders, 0) AS orders, coalesce(d.status, 'active') AS status
+     ORDER BY d.date LIMIT 1`,
+    { id: id ?? null },
     g,
   );
   return d;
+}
+
+/** The next free PO number, e.g. PO-020 after PO-019. */
+export async function nextPoId(graph: string, offset = 0): Promise<string> {
+  const [{ next }] = await ro<{ next: number }>("MATCH (po:PO) RETURN coalesce(max(toInteger(substring(po.id, 3))), 0) + 1 AS next", {}, graph);
+  return `PO-${String(next + offset).padStart(3, "0")}`;
+}
+
+export type DropSummary = Drop & { styles: number; skus: number; units: number };
+/** Every collection, current and planned, with its size. */
+export async function drops(): Promise<DropSummary[]> {
+  return ro<DropSummary>(
+    `MATCH (d:Drop) OPTIONAL MATCH (s:Style)-[:IN_DROP]->(d) OPTIONAL MATCH (k:SKU)-[:OF_STYLE]->(s)
+     RETURN d.id AS id, d.name AS name, d.date AS date, d.today AS today, coalesce(d.orders, 0) AS orders,
+            coalesce(d.status, 'active') AS status, count(DISTINCT s) AS styles, count(k) AS skus, coalesce(sum(k.planned), 0) AS units
+     ORDER BY d.date`,
+    {},
+    await activeGraph(),
+  );
 }
 
 export const daysBetween = (a: string, b: string) =>
@@ -33,14 +55,15 @@ export const daysBetween = (a: string, b: string) =>
 export type HeatRow = { line: string; style: string; colour: string; cells: { size: string; pct: number; soldOut: boolean }[] };
 /** Sell-through by style × colour × size, aggregated from SKU nodes. */
 export async function heatmap(): Promise<HeatRow[]> {
+  const g = await activeGraph();
   const rows = await ro<{ line: string; style: string; colour: string; size: string; sold: number; planned: number }>(
-    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style)
+    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style)-[:IN_DROP]->(:Drop {id:$drop})
      RETURN k.line AS line, s.name AS style, k.colour AS colour, k.size AS size, k.sold AS sold, k.planned AS planned
      ORDER BY line, size DESC`,
-    {},
-    await activeGraph(),
+    { drop: (await drop(g)).id },
+    g,
   );
-  const order = ["LEG-BLK", "LEG-OLV", "BRA-BLK", "TNK-BLK", "TNK-OLV"];
+  const order = [...new Set(rows.map((r) => r.line))];
   const sizes = ["S", "M", "L"];
   return order.map((line) => {
     const r = rows.filter((x) => x.line === line);
@@ -49,9 +72,9 @@ export async function heatmap(): Promise<HeatRow[]> {
       style: r[0]?.style ?? line,
       colour: r[0]?.colour ?? "",
       cells: sizes.map((size) => {
-        const c = r.find((x) => x.size === size)!;
-        const pct = Math.round((100 * c.sold) / c.planned);
-        return { size, pct, soldOut: c.sold >= c.planned };
+        const c = r.find((x) => x.size === size) ?? { sold: 0, planned: 0 };
+        const pct = c.planned ? Math.round((100 * c.sold) / c.planned) : 0;
+        return { size, pct, soldOut: c.planned > 0 && c.sold >= c.planned };
       }),
     };
   });
@@ -59,11 +82,12 @@ export async function heatmap(): Promise<HeatRow[]> {
 
 export type Totals = { sold: number; planned: number; revenue: number; returns: number };
 export async function totals(): Promise<Totals> {
+  const g = await activeGraph();
   const [t] = await ro<Totals>(
-    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style)
+    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style)-[:IN_DROP]->(:Drop {id:$drop})
      RETURN sum(k.sold) AS sold, sum(k.planned) AS planned, sum(k.sold * s.price) AS revenue, sum(k.returns) AS returns`,
-    {},
-    await activeGraph(),
+    { drop: (await drop(g)).id },
+    g,
   );
   return t;
 }
@@ -75,11 +99,13 @@ export async function restocks(limit = 3): Promise<Restock[]> {
   const d = await drop(g);
   const daysLive = Math.max(1, daysBetween(d.date, d.today));
   const rows = await ro<{ id: string; style: string; colour: string; size: string; sold: number; onHand: number; supplier: string; leadDays: number }>(
-    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style), (po:PO)-[:SUPPLIES]->(k), (po)-[:MADE_BY]->(sup:Supplier)
+    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style)-[:IN_DROP]->(:Drop {id:$drop}), (po:PO)-[:SUPPLIES]->(k)
      WHERE k.sold > 0
+     WITH k, s, max(po.id) AS latest
+     MATCH (:PO {id:latest})-[:MADE_BY]->(sup:Supplier)
      RETURN k.id AS id, s.name AS style, k.colour AS colour, k.size AS size, k.sold AS sold, k.onHand AS onHand,
             sup.name AS supplier, sup.leadDays AS leadDays`,
-    {},
+    { drop: d.id },
     g,
   );
   // Incoming: POs not yet received, split evenly across the SKUs each one supplies.
@@ -137,17 +163,17 @@ export async function openCalls(graph?: string): Promise<Call[]> {
   );
 }
 
-export type PO = { id: string; supplier: string; supplierId: string; line: string; label: string; qty: number; unitPrice: number; eta: string; stage: string; status: string; pending: string | null; quiet: boolean };
+export type PO = { id: string; supplier: string; supplierId: string; line: string; label: string; qty: number; unitPrice: number; eta: string; stage: string; status: string; pending: string | null; quiet: boolean; dropId: string; dropName: string };
 export async function pos(graph?: string): Promise<PO[]> {
   return ro<PO>(
-    `MATCH (po:PO)-[:MADE_BY]->(sup:Supplier), (po)-[:SUPPLIES]->(k:SKU)-[:OF_STYLE]->(s:Style)
-     WITH po, sup, s, collect(k)[0] AS k
+    `MATCH (po:PO)-[:MADE_BY]->(sup:Supplier), (po)-[:SUPPLIES]->(k:SKU)-[:OF_STYLE]->(s:Style)-[:IN_DROP]->(dd:Drop)
+     WITH po, sup, s, dd, collect(k)[0] AS k
      OPTIONAL MATCH (po)-[:HAS_CHECKIN]->(ci:CheckIn)
-     WITH po, sup, s, k, collect(ci) AS cis
+     WITH po, sup, s, dd, k, collect(ci) AS cis
      OPTIONAL MATCH (c:Call {status:'open', kind:'delay'})-[:ABOUT]->(po)
      RETURN po.id AS id, sup.name AS supplier, sup.id AS supplierId, k.line AS line, s.name + ' · ' + k.colour AS label,
             po.qty AS qty, po.unitPrice AS unitPrice, po.eta AS eta, po.stage AS stage, po.status AS status,
-            c.summary AS pending, any(x IN cis WHERE x.status = 'quiet') AS quiet
+            c.summary AS pending, any(x IN cis WHERE x.status = 'quiet') AS quiet, dd.id AS dropId, dd.name AS dropName
      ORDER BY id`,
     {},
     graph ?? (await activeGraph()),
@@ -206,12 +232,13 @@ export async function supplierRisk(): Promise<{ name: string; score: number; sku
 
 /** Styles with at least one approved sample, out of all styles. */
 export async function samplesApproved(): Promise<{ approved: number; styles: number }> {
+  const g = await activeGraph();
   const [r] = await ro<{ approved: number; styles: number }>(
-    `MATCH (s:Style) OPTIONAL MATCH (s)-[:HAS_SAMPLE]->(x:Sample {status:'approved'})
+    `MATCH (s:Style)-[:IN_DROP]->(:Drop {id:$drop}) OPTIONAL MATCH (s)-[:HAS_SAMPLE]->(x:Sample {status:'approved'})
      WITH s, count(x) AS n
      RETURN count(CASE WHEN n > 0 THEN 1 END) AS approved, count(s) AS styles`,
-    {},
-    await activeGraph(),
+    { drop: (await drop(g)).id },
+    g,
   );
   return r;
 }

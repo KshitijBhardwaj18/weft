@@ -5,7 +5,7 @@ import { activeGraph, phase } from "./plan";
 const client = new Anthropic();
 
 const SCHEMA = `Graph schema (FalkorDB, openCypher). Every node has an \`id\`.
-(:Drop {name, date, phase, today, orders})
+(:Drop {name, date, phase, today, orders, status})  status 'planning' = a collection being planned; otherwise the current one
 (:Style {name, price, fabric})-[:IN_DROP]->(:Drop)
 (:SKU {code, line, colour, size, planned, sold, onHand, returns, returnReason})-[:OF_STYLE]->(:Style)
 (:PO {qty, unitPrice, eta, stage, status})-[:SUPPLIES]->(:SKU)
