@@ -1,68 +1,64 @@
-# Weft: one live plan per drop, on a FalkorDB graph
+# Weft: one live plan for a D2C product, from planning to restock
 
-Thirteen days before our Black Drop goes live, a message arrives from the factory in a WhatsApp group: the fabric for the leggings is late. It sits between a dozen other messages. Three creators have already scheduled posts that say the drop goes live on 1 December. Nothing we use connects the two.
+Thirteen days before our Black Drop goes live, a message arrives in a WhatsApp group: the fabric for the leggings is late. It sits between a dozen other messages. Three creators have already scheduled posts that say the drop goes live on 1 December. Nothing we use connects the two.
+
+That is the first failure. The second comes later. The drop launches, the black leggings in size M sell out on day four, and the reorder waits a week because nobody checked sell-through against the supplier's lead time. The third is quieter: when the restock arrives, the stock count in the spreadsheet is still wrong.
 
 ![Tools that each see one slice of the drop](assets/01-scattered.gif)
 
-Weft is what we built for FalkorDB's Graph Hacks: Context for AI Agents hackathon. It keeps one live plan for each drop, stored as a graph, and three AI teammates work on that plan. This post covers why we chose a graph, how the model is laid out, and what the demo does with it.
+Weft is what we built for FalkorDB's Graph Hacks: Context for AI Agents hackathon. It keeps one live plan for each product, from the first sample to the next restock, stored as a FalkorDB graph. Three AI teammates work on that plan. This post walks through the full loop on one case study, explains why the plan is a graph, and says plainly what is built and what is not.
+
+**Demo video:** [docs/demo/weft-demo.mp4](../demo/weft-demo.mp4). It is a screen recording of the running app, with captions, from the case study below.
 
 ## The problem
 
-Small D2C brands miss launches and money for things nobody noticed in time. A supplier goes quiet, a delay is buried in a chat, a size sells out while the reorder never goes out.
+A D2C product is planned, made, sold and restocked. Each stage has its own tool, and the founder is the one who carries information between them:
 
-Every tool sees one slice. Shopify sees orders, WhatsApp holds the supplier talk, and a spreadsheet holds the production plan. Problems that cross from making to selling stay invisible until a customer or a creator notices.
+- **Planning.** Styles, SKUs and planned units sit in a spreadsheet. Sample approvals sit in a chat.
+- **Making.** Purchase orders and delivery dates sit in WhatsApp groups and Excel. A delay is a message, not a fact anyone can query.
+- **Selling.** Shopify holds orders, refunds and discount codes. Creators post dates that nobody checks against production.
+- **Restocking.** A size sells out, and the reorder waits because sell-through is not compared with lead time. When goods arrive, the stock count is updated by hand, or not at all.
+- **Deciding.** A supplier change agreed on a call is never written down, so months later nobody can say why it happened.
 
-## Why this is a graph problem
+Small brands of five to thirty people run this loop every day, and the founder is the router. Every tool sees one stage. The problems that matter sit at the joins, between making and selling and between selling and making again, and they stay invisible until a customer or a creator notices.
 
-The questions that matter are about connections, not records. "Which creator posts break if PO-014 is late?" is not a lookup on the PO. It is a walk from the PO through its SKUs, their style and drop, and back in through every creator post that promotes that drop.
+## The loop
 
-A relational schema can answer that with joins written by hand for each question. We wanted the walk to be the query itself, and we wanted the same walk to run inside every step an agent takes. That is the case for a graph.
+Weft follows one product through six stages. Each stage reads and writes the same graph, so a change in one stage shows up in the others.
 
-## Why FalkorDB
+| Stage | Today | With Weft | Status |
+|---|---|---|---|
+| **Plan** | Styles, SKUs and planned units in a spreadsheet | Drop, styles, SKUs and samples as connected nodes | Seeded in the demo. Creating them in the app is next |
+| **Make** | POs and delays in chat and Excel | Check-ins, delay calls with their impact, scenarios | Built |
+| **Launch** | Creator post dates in a calendar | The drop date on the same graph as every post and PO that depends on it | Built |
+| **Sell** | One Shopify dashboard per question | Orders, refunds and returns written onto SKU and creator nodes | Built. The demo uses seeded orders |
+| **Restock** | Judgement, or a late reorder | A restock drafted from sell-through and lead time, a PO on approval, stock up on receipt | Built |
+| **Learn** | Decisions kept in memory | Every decision recorded with its source, creators ranked by orders and repeat rate | Partly built |
 
-Each reason below maps to something the app does.
+## The case study: the Black Drop
 
-- **Multi-hop traversal.** The delay query goes five hops, from a PO to a creator. We needed that fast enough to run inside every agent step, not as a nightly job.
-- **Many graphs in one instance.** The Countdown plan is the graph `weft`. The day-9 snapshot is `weft_live`. Each scenario is its own graph, and `weft_meta` holds the current phase.
-- **GRAPH.COPY.** A scenario is a full copy of the plan. We change the copy, compare it with reality, and throw it away or apply it.
-- **Built-in algorithms.** PageRank runs over the supply edges through a single procedure call.
-- **openCypher.** The app, the agent tool and the seed script use one query language.
+The case study is a premium fitness-wear brand in India and its first collection, the Black Drop.
 
-The web app is Next.js 15 with server components that read the graph directly, and route handlers for actions. The seed script loads the 15-SKU Black Drop into FalkorDB and creates the Live snapshot in the same run.
+- **Styles:** Core Leggings, Sculpt Sports Bra, Everyday Tank. Fifteen SKUs in black and olive, sizes S, M and L.
+- **Units:** 2,100 planned for launch on 1 December.
+- **Suppliers:** Sri Lakshmi Knits in Tiruppur (14-day lead time) for the leggings and bra, Kavya Garments in Bengaluru (10 days) for the tanks, and Ananya Fabrics for lab dips.
+- **Creators:** three fitness creators, each with a discount code, booked to post on 25 November.
 
-## The model
+The demo runs in two states of the same plan: **Countdown** (18 November, before launch) and **Live** (10 December, day nine).
 
-```mermaid
-graph LR
-  Creator -- POSTED --> CreatorPost
-  CreatorPost -- PROMOTES --> Drop
-  Style -- IN_DROP --> Drop
-  SKU -- OF_STYLE --> Style
-  PO -- SUPPLIES --> SKU
-  PO -- MADE_BY --> Supplier
-  Person -- OWNS --> PO
-  PO -- HAS_CHECKIN --> CheckIn
-  Call -- ABOUT --> PO
-  Call -- RAISED_BY --> Teammate
-  Decision -- SOURCED_FROM --> Message
-```
+## Walkthrough
 
-Every node carries an `id`, and every decision points back to where it came from. A `Decision` is `SOURCED_FROM` a `Message` or a `CheckIn`, so the founder can always ask where a change was agreed.
+### 1. Plan
 
-The design rule is simple: **the plan is the source of truth, and chat is one input.** If nobody types, nothing should silently go stale. The plan is kept current four ways:
+The Today screen opens thirteen days before the drop. Production, samples, creators and suppliers are one plan. Every PO and its status comes from the graph, not from a list someone maintains.
 
-1. The team edits the plan in the UI.
-2. Supplier check-ins. Shuttle asks a supplier a structured question before something is due, and the answer is one tap.
-3. Chat. Messages are nodes, and decisions link back to them. Turning chat into proposed updates is next.
-4. The calendar. A due date that passes with no confirmation becomes a check-in that has gone quiet.
+### 2. Make: a delay becomes a call
 
-The demo builds the first two in full. It seeds a quiet check-in for the olive lab dip on PO-019, so the graph already holds an example of the fourth. Real calendar reading is not built yet.
+The supplier's view shows Murugan at Sri Lakshmi only his own POs and check-ins. Shuttle, the production teammate, asks before a date is due: *is the fabric in for PO-014?* Murugan answers in one tap: *Yes, arrived*, or *Delayed*, with a new fabric date.
 
-## Feature walkthrough
+![Shuttle's check-in on PO-014 in the supplier's view](screens/checkin.png)
 
-### 1. Delay impact: follow the slip through the graph
-
-When a PO slips, the question is what it breaks. This query starts at the PO and walks to its SKUs, their style and drop, then back in through every creator post that promotes that drop.
+That answer is a fact on the graph, and it raises a delay call. Weft walks the impact in one query: from the PO, through its SKUs and style, to the drop, and back in through every creator post that promises the drop date.
 
 ```cypher
 MATCH (po:PO {id:$po})-[:MADE_BY]->(sup:Supplier), (owner:Person)-[:OWNS]->(po),
@@ -73,113 +69,120 @@ RETURN po.id AS po, sup.name AS supplier, collect(DISTINCT k.code) AS skus, s.na
        collect(DISTINCT {handle: cr.handle, date: p.date}) AS posts
 ```
 
-A drop is at risk when any PO supplying it lands after the drop date, and the creator posts promoting it are then broken. The result feeds the "Your call" card with its impact: the SKUs at risk, the creators who promised the date, and the person who owns the PO.
+In the demo, the fabric lands four days late, on 5 December, and three creator posts announcing 1 December would break.
 
 ![A delay pulse travelling from the supplier to the creators](assets/02-ripple.gif)
 
-### 2. Scenarios: copy, change, compare, apply
+### 3. Scenario: test the change before making it
 
-A scenario is a private copy of the plan. We create it with GRAPH.COPY, then make the change inside the copy only. In the demo, the change is moving PO-014 from Sri Lakshmi Knits to Kavya Garments.
+A scenario is a private copy of the whole plan. We create it with `GRAPH.COPY`, change the copy, and compare it with reality. In the demo, the change is moving PO-014 to Kavya Garments, whose 10-day lead time lands the order before launch.
 
-```cypher
-MATCH (po:PO {id:$po})-[r:MADE_BY]->(:Supplier), (to:Supplier {id:$to})
-DELETE r
-CREATE (po)-[:MADE_BY]->(to)
-SET po.eta = $eta, po.unitPrice = po.unitPrice + 20, po.status = 'accepted', po.stage = 'Fabric'
-WITH po OPTIONAL MATCH (c:Call {status:'open'})-[:ABOUT]->(po) SET c.status = 'resolved'
-```
+The comparison asks the same question of both graphs:
 
-The new ETA is today plus the new supplier's lead time, the unit price goes up by 20 for the demo, and any open call on that PO is marked resolved. All of it happens only inside the copy.
+| | Reality, with the delay | This scenario |
+|---|---|---|
+| PO-014 arrives | 5 Dec, 4 days late | 28 Nov, 3 days spare |
+| Black Drop, 1 Dec | Late | On time |
+| Creator posts announcing "live 1 Dec" | 3 broken | All kept |
+| Cost | ₹2,52,000 | ₹2,64,000 (+₹12,000) |
 
-Compare asks the same question of both graphs. The reality side includes any pending delay, and the scenario side uses the new supplier:
-
-```cypher
-MATCH (p:PO {id:$po})-[:MADE_BY]->(sup:Supplier), (p)-[:SUPPLIES]->(:SKU)-[:OF_STYLE]->(:Style)-[:IN_DROP]->(d:Drop)
-OPTIONAL MATCH (c:Call {status:'open', kind:'delay'})-[:ABOUT]->(p)
-OPTIONAL MATCH (:Creator)-[:POSTED]->(cp:CreatorPost)-[:PROMOTES]->(d)
-RETURN sup.name AS supplier, p.eta AS eta, c.newEta AS pending, p.qty * p.unitPrice AS cost,
-       d.date AS dropDate, count(DISTINCT cp) AS posts
-```
-
-Apply to plan is also a copy. The scenario graph is copied over the plan, the decision is recorded in the plan with the PO and its new supplier, and the scenario graph is deleted:
-
-```cypher
-MATCH (k:Person {id:'kshitij'}), (po:PO {id:$po})-[:MADE_BY]->(sup:Supplier)
-CREATE (k)-[:DECIDED]->(d:Decision {id:'d-' + $id, text:'Moved ' + $po + ' to ' + sup.name + ' (scenario ' + $id + ')', at:$at, by:'Kshitij'})-[:ABOUT]->(po),
-       (d)-[:ABOUT]->(sup)
-```
+*Apply to plan* copies the scenario over the plan, records the decision with who made it and when, and deletes the scenario graph.
 
 ![Copying the plan, re-pointing the PO, and applying the copy back](assets/03-scenario.gif)
 
-### 3. Single points of failure
+### 4. Sell: day nine of the drop
 
-Which supplier does the drop lean on most? We run PageRank over the `MADE_BY` edges. A supplier that many POs point to ranks high, and the Today screen lists the top few as single points of failure.
+Switch the clock to Live. Sixty-two percent of the 2,100 units have sold, 1,307 in total. The sell-through heatmap shows black leggings in size M sold out on day four. Revenue, returns and creator ranking come from the same graph.
 
-```cypher
-CALL algo.pageRank(null, 'MADE_BY') YIELD node, score
-WITH node, score WHERE node:Supplier
-OPTIONAL MATCH (node)<-[:MADE_BY]-(:PO)-[:SUPPLIES]->(k:SKU)
-RETURN node.name AS name, score, count(k) AS skus ORDER BY score DESC
+![Today in Live, day nine: 62 percent sold and the sell-through heatmap](screens/sell-day9.png)
+
+Creators rank by the orders on their code, with their repeat rate, so the next drop's creator choice starts from evidence.
+
+### 5. Restock to receipt: the loop closes
+
+This is the step that most tools miss. Pattern, the sales teammate, drafts the restock from three inputs: sell rate, supplier lead time and stock on hand.
+
+```
+daysLive = max(1, days from drop date to today)
+rate     = sold / daysLive
+qty      = ceil to 10 of max(0, rate × leadDays − onHand − incoming)
+shown    = qty > 0 and days of stock left (onHand / rate) < 7
 ```
 
-If the procedure call fails or returns nothing, the same card falls back to counting SKUs per supplier. That is a cruder answer, and the card still works.
+`incoming` is the quantity on POs that have not been received yet. Before this change, the formula ignored open POs, so an approved restock still looked needed. Now an approved restock covers its SKU, and it drops off *Restock now*.
 
-### 4. Sell-through and restock
+![After approval, the restock leaves Restock now](screens/restock-closed.png)
 
-Revenue and totals are one aggregation over the SKU nodes:
-
-```cypher
-MATCH (k:SKU)-[:OF_STYLE]->(s:Style)
-RETURN sum(k.sold) AS sold, sum(k.planned) AS planned, sum(k.sold * s.price) AS revenue, sum(k.returns) AS returns
-```
-
-Restocks pull each SKU with its supplier and lead time, then compute the rate in the app:
+Approving the call writes a new PO with a unique id, priced from that SKU's last PO, and notifies the supplier when email or WhatsApp is configured. When the goods arrive, *Mark received* adds the PO's quantity to stock, split evenly across the SKUs the PO supplies. The black leggings in size M go from 0 on hand to 340.
 
 ```cypher
-MATCH (k:SKU)-[:OF_STYLE]->(s:Style), (po:PO)-[:SUPPLIES]->(k), (po)-[:MADE_BY]->(sup:Supplier)
-WHERE k.sold > 0
-RETURN k.id AS id, s.name AS style, k.colour AS colour, k.size AS size, k.sold AS sold, k.onHand AS onHand,
-       sup.name AS supplier, sup.leadDays AS leadDays
+MATCH (po:PO {id:$id})-[:SUPPLIES]->(k:SKU)
+WITH po, collect(k) AS ks
+UNWIND ks AS k
+SET k.onHand = coalesce(k.onHand, 0) + toInteger(round(toFloat(po.qty) / size(ks)))
+WITH DISTINCT po
+SET po.stage = 'Received', po.status = 'received'
 ```
 
-The rate is units sold divided by days live. The suggested quantity is the rate times the lead time, minus what is on hand, rounded up to the next 10. Only SKUs with under seven days of stock are shown. The heatmap uses the same SKU rows and computes its percentages in the app.
+![The Drop page after receipt: black leggings M on hand 340](screens/stock-received.png)
 
-Pattern turns these into calls. In the demo, the black leggings in size M sold out on day 4, and Pattern drafted a restock from Sri Lakshmi Knits on their 14-day lead time.
+Sold, reordered, received. The stock on the Drop page is the same stock the next restock calculation reads.
 
-### 5. Teammates that answer from the graph
+## How it connects
 
-Weft is the chief of staff, Shuttle runs production, and Pattern is the sales analyst. Each is Claude with one tool, `run_cypher`, which sends a query through `GRAPH.RO_QUERY`. A teammate can read the plan as far as it needs to, and it cannot write to it.
+Three kinds of connection make the loop work. Each one writes to the same graph.
 
-Every query a teammate runs is listed under **See why**, next to the answer. A founder can check the path from the answer back to the graph, rather than trusting the summary.
+- **Sources in.** Shopify orders, refunds and inventory arrive as webhooks, verified with HMAC. A stock update identifies its SKU through Shopify's inventory item. Supplier check-ins go out by app, by email through Resend, or by WhatsApp Cloud API, and the answer comes back to the graph. Creator discount codes attribute orders to creators.
+- **The graph.** One FalkorDB instance holds the live plan (`weft`), the day-nine snapshot (`weft_live`), workspace settings (`weft_meta`) and a copy for each scenario. Messages, decisions and calls each point back to the message or check-in they came from.
+- **Teammates out.** Weft (chief of staff), Shuttle (production) and Pattern (sales) are one Claude model with one tool, `run_cypher`. It runs through `GRAPH.RO_QUERY`, so a teammate can read the plan and cannot write to it. A teammate proposes a change as a call, and an Owner or Manager decides it. Every query a teammate runs is listed under *See why*, next to the answer.
 
-Your call is a list of open Call nodes, each raised by a teammate and pointing at the SKU or PO it concerns:
+![Ask a teammate, and See why shows the queries behind the answer](screens/ask-see-why.png)
 
-```cypher
-MATCH (c:Call {status:'open'})-[:RAISED_BY]->(t:Teammate)
-OPTIONAL MATCH (c)-[:ABOUT]->(a)
-RETURN c.id AS id, c.kind AS kind, c.title AS title, c.summary AS summary, t.name AS teammate,
-       coalesce(a.id, '') AS about, c.at AS at
-ORDER BY c.at DESC
-```
+## Why the plan is a graph
 
-In the demo, Pattern's restock draft and Shuttle's request to move a tank restock by three days are both open calls. Each one shows its impact before anyone acts on it.
+The questions that matter are about connections, not records. "Which creator posts break if PO-014 is late?" is not a lookup on the PO. It is a walk from the PO through its SKUs and style to the drop, and back in through every post that promotes it.
+
+A relational schema can answer that with joins written for each question. We wanted the walk to be the query itself, and we wanted the same walk inside every step an agent takes.
+
+FalkorDB does what the product needs:
+
+- **Multi-hop traversal** for delay impact, which runs inside every agent step rather than as a nightly job.
+- **Many graphs in one instance.** Each scenario is its own graph, copied with `GRAPH.COPY`.
+- **Built-in algorithms.** PageRank over supply edges ranks single points of failure.
+- **Full-text and range indexes** back search on the Brand map and every `{id: ...}` lookup.
+- **openCypher** is the one query language for the app, the agent tool and the seed script.
 
 ## What surprised us
 
-- **shortestPath only follows edges in their stated direction.** See why needs the path between an answer and its sources, and many of those paths run against the arrows. A call points at a PO, and a decision points at a message. So See why uses a bounded variable-length match instead of `shortestPath`.
-- **Apply is a whole-graph swap.** Applying a scenario copies it over the plan, so any change made to the plan after the copy is lost. A proper merge would take only the scenario's own changes. We did not build that.
-- **Separate graphs keep what-if honest.** A scenario is a real graph, so reality and the copy are queried with the same code. A write inside a scenario cannot reach the live plan until someone applies it.
-- **Three suppliers is a small graph for PageRank.** On this seed, the ranking mostly repeats the SKU count. The algorithm earns its place on a brand with a larger supply base.
-- **The orders are seeded.** Shopify-shaped orders are written into the graph by the seed script. The sales answers are real queries over that data, but they have not been tested against a live store.
+- **`shortestPath` only follows edges in their stated direction.** A call points at a PO, and a decision points at a message, so many *See why* paths run against the arrows. We use a bounded variable-length match instead.
+- **Apply is a whole-graph swap.** Applying a scenario copies it over the plan, so a change made to the plan after the copy is lost. A proper merge would take only the scenario's own changes. We have not built that yet.
+- **A line PO covers several sizes.** Line-level POs have one quantity for three sizes, so incoming stock is split evenly across the SKUs. A restock PO covers one SKU, so its split is exact.
+- **Shopify's inventory webhook does not carry the SKU.** It sends an inventory item id, so the app looks the SKU up. We have not run this against a live store.
 
-## What's next
+## What is built, and what is not
 
-- **Shopify connector.** Orders flow into the same graph instead of the seed.
-- **Resend check-in emails.** Suppliers answer a check-in from their inbox, not only in the app.
-- **WhatsApp bridge.** Supplier chat and check-ins reach the supplier's own phone.
-- **Vector index.** A vector index beside the existing full-text index, for semantic search over messages and notes.
+**Built and shown in the demo:** the plan graph, delay impact, scenarios (copy, compare, apply), supplier check-ins and chat, teammate answers with *See why*, sell-through, returns and creator ranking, the restock draft, approval into a PO, and goods receipt into stock.
 
-Weft keeps one live plan per drop on a FalkorDB graph, so a delay in a factory chat shows up everywhere it breaks.
+**Built, not yet run against live services:** Shopify orders, refunds and inventory sync and webhooks, Resend emails and the WhatsApp Cloud API. The demo uses seeded orders and skips these integrations when their keys are not set.
+
+**Not built yet:**
+- Creating a drop, style, SKU or PO in the app. Planning is read-only today.
+- Sign-in. The app uses an acting-as switcher for roles.
+- A live Shopify store connection, tested end to end.
+- Supplier reliability scores, and a calendar that flags check-ins gone quiet.
+- Stock adjustments and multiple warehouses.
+- A vector index beside the full-text index, for semantic search over messages and notes.
+
+## Run it locally
+
+```bash
+docker compose up -d                 # FalkorDB on port 6380, FalkorDB Browser on port 3001
+cd web && pnpm install
+cp .env.example .env.local           # then set ANTHROPIC_API_KEY in web/.env.local
+pnpm seed                            # builds the demo graphs
+pnpm dev                             # open http://localhost:3000
+```
+
+The demo script, with the steps for the video, is in [docs/DEMO.md](../DEMO.md).
 
 Code: https://github.com/KshitijBhardwaj18/weft
-Demo: <demo video link>

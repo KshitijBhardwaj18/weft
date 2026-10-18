@@ -1,0 +1,1412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weft: one live plan</title>
+<meta name="description" content="How we built Weft for FalkorDB Graph Hacks: one live plan per drop on a FalkorDB graph, with AI teammates that chase the updates and show what every change breaks.">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#F4F3EC;--surface:#FFFEF8;--surface-2:#FBFAF4;--raised:#ECEBE1;
+  --ink:#1A1A1A;--ink-2:#5F5E5A;--line:rgba(26,26,26,.09);--line-2:rgba(26,26,26,.16);
+  --fathom:#034F46;--fathom-ink:#CFE6E1;--cream:#FFFFEB;
+  --dawn:#F0D7FF;--dawn-ink:#4A1F70;--dawn-soft:#F7F1FB;
+  --glow:#E08A1E;--glow-soft:#FCEBCF;--glow-ink:#6B4300;--pending-bg:#FFFBF2;
+  --flare-soft:#FFDDD3;--flare-ink:#8A2A12;--signal-soft:#FFE3F8;--signal-ink:#8A2C74;
+  --pulse:#7F1C34;--late-soft:#F8E4E4;--hot:#D8452A;--ok-soft:#CEF5CA;--ok-ink:#114E0B;
+  --vendor-soft:#D5EBE6;--style-soft:#FFE7C7;--style-ink:#6B3A00;--po-soft:#E4E4D0;--po-ink:#33331F;
+  --serif:"EB Garamond",Georgia,serif;--sans:Figtree,system-ui,-apple-system,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);--io:cubic-bezier(.65,0,.35,1);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font:400 18px/1.65 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--fathom);text-underline-offset:3px}
+p{margin:0 0 1.05em}
+em{font-style:italic}
+.col{max-width:680px;margin:0 auto;padding:0 16px}
+
+/* ---------- article ---------- */
+.top{max-width:992px;margin:0 auto;padding:22px 16px 0;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font:400 28px/1 var(--serif);letter-spacing:-.5px;color:var(--ink);text-decoration:none}
+.brand .sq{width:10px;height:10px;border-radius:3px;background:var(--fathom)}
+.top a.gh{font:600 14px var(--sans);text-decoration:none}
+.hero-a{padding:72px 0 8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font:600 12px/1 var(--sans);letter-spacing:.7px;text-transform:uppercase;color:var(--ink-2)}
+.kicker .sq{width:8px;height:8px;border-radius:3px;background:var(--fathom)}
+h1{font:400 clamp(46px,9vw,84px)/.98 var(--serif);letter-spacing:-.035em;margin:18px 0 22px;font-feature-settings:"lnum" 1}
+h1 em{color:var(--fathom)}
+.dek{font-size:21px;line-height:1.5;color:var(--ink-2);margin:0 0 26px}
+.byline{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px;color:var(--ink-2)}
+.byline b{color:var(--ink);font-weight:600}
+.byline .dot{width:3px;height:3px;border-radius:50%;background:var(--ink-2)}
+.weave{display:block;width:100%;height:120px;margin:40px 0 0}
+.weave .warp{stroke:rgba(26,26,26,.08);stroke-width:1}
+.weave .thread{fill:none;stroke-width:2;stroke-linecap:round;stroke-dasharray:1 1;stroke-dashoffset:1;animation:draw 2.6s var(--io) forwards}
+section.ch{padding:64px 0 8px}
+h2{font:400 clamp(36px,6.4vw,52px)/1.03 var(--serif);letter-spacing:-.03em;margin:14px 0 24px;font-feature-settings:"lnum" 1}
+h2 em{color:var(--fathom)}
+.slice{padding-top:44px}
+.sh{display:flex;align-items:baseline;gap:12px;margin:0 0 12px}
+.sh .n{flex-shrink:0;font:500 12px/1 var(--mono);color:var(--fathom);border:1px solid rgba(3,79,70,.3);border-radius:999px;padding:5px 8px}
+h3{font:400 31px/1.1 var(--serif);letter-spacing:-.6px;margin:0;font-feature-settings:"lnum" 1}
+h3 em{color:var(--fathom)}
+.pull{font:italic 400 clamp(36px,6.4vw,56px)/1.04 var(--serif);letter-spacing:-.03em;color:var(--fathom);margin:40px 0 34px;text-align:center}
+.lead-in{font-size:20px}
+code{font:500 .84em var(--mono);background:var(--raised);border-radius:6px;padding:1px 6px}
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.roadmap{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-2)}
+.roadmap li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:16px 0;border-bottom:1px solid var(--line-2)}
+.roadmap li span{font:500 12px/1.9 var(--mono);color:var(--fathom)}
+.roadmap b{font-weight:600}
+.close{margin:72px auto 0;max-width:960px;background:var(--fathom);color:var(--cream);border-radius:26px;padding:48px 32px;text-align:center}
+.close p.big{font:400 clamp(30px,5vw,44px)/1.08 var(--serif);letter-spacing:-.02em;margin:0 auto 26px;max-width:720px}
+.close .links{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.close a{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border-radius:10px;font:600 15px var(--sans);text-decoration:none}
+.close a.c1{background:var(--cream);color:var(--fathom)}
+.close a.c2{background:rgba(255,255,235,.14);color:var(--cream)}
+.foot{max-width:680px;margin:28px auto 64px;padding:0 16px;font-size:13px;color:var(--ink-2);text-align:center}
+.wrap-close{padding:0 16px}
+
+/* ---------- figures ---------- */
+.scene{max-width:992px;margin:30px auto 18px;padding:0 16px}
+.stage{position:relative;border-radius:24px;background:var(--surface);overflow:hidden;box-shadow:0 0 0 1px var(--line),0 30px 60px -36px rgba(26,26,26,.28)}
+.inner{position:relative;padding:16px}
+figcaption{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;max-width:680px;margin:14px auto 0;font-size:14px;line-height:1.5;color:var(--ink-2)}
+.replay{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);font:600 12.5px var(--sans);cursor:pointer}
+.replay:hover{background:var(--surface-2)}
+.replay svg{width:13px;height:13px}
+@media (min-width:720px){
+  .stage.fix{aspect-ratio:16/9}
+  .stage.fix>.inner{position:absolute;left:0;top:0;width:960px;height:540px;padding:0;transform-origin:0 0;transform:scale(var(--k,1))}
+  .d-abs>*{position:absolute}
+}
+
+/* ---------- UI kit (mirrors web/src/app/globals.css) ---------- */
+.ui{font:400 14px/1.4 var(--sans);color:var(--ink)}
+.ui .serif{font-family:var(--serif);font-weight:400}
+.ui .mono{font-family:var(--mono)}
+.ui .muted{color:var(--ink-2)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.swap{display:inline-grid}.swap>*{grid-area:1/1}
+.avatar{width:18px;height:18px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font:400 13px/1 var(--serif);flex-shrink:0}
+.av-weft{background:var(--dawn);color:#5b2a86}.av-shuttle{background:var(--vendor-soft);color:var(--fathom)}.av-pattern{background:var(--style-soft);color:var(--style-ink)}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill .dot{width:8px;height:8px;border-radius:50%}
+.pill.ok{background:var(--ok-soft);color:var(--ok-ink)}.pill.ok .dot{background:#2e8b26}
+.pill.risk{background:var(--glow-soft);color:var(--glow-ink)}.pill.risk .dot{background:var(--glow)}
+.badge{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;white-space:nowrap;font-family:var(--sans)}
+.badge.ok{background:var(--ok-soft);color:var(--ok-ink)}.badge.risk{background:var(--glow-soft);color:var(--glow-ink)}.badge.late{background:var(--late-soft);color:var(--pulse)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:3px 9px;font-size:12px;font-weight:500;white-space:nowrap}
+.chip.vendor{background:var(--vendor-soft);color:var(--fathom)}.chip.style{background:var(--style-soft);color:var(--style-ink)}
+.chip.po{background:var(--po-soft);color:var(--po-ink)}.chip.drop{background:var(--flare-soft);color:var(--flare-ink)}
+.chip.creator{background:var(--signal-soft);color:var(--signal-ink)}.chip.decision{background:#f3d9df;color:var(--pulse)}
+.chip.msg{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line-2);color:var(--ink-2)}
+.chip.dawn{background:var(--dawn);color:var(--dawn-ink)}
+.chip.cite{padding:0 6px;font-size:11px;vertical-align:1px;font-family:var(--mono)}
+.btn{height:36px;padding:0 14px;border-radius:9px;background:var(--ink);color:var(--surface);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn.sm{height:30px;padding:0 11px;font-size:12.5px;border-radius:8px}
+.btn.lg{height:42px;padding:0 18px;font-size:15px;border-radius:10px}
+.btn.ghost{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.btn.quiet{background:transparent;color:var(--ink-2)}
+.btn.dawn{background:var(--dawn);color:var(--dawn-ink)}
+.btn.fathom{background:var(--fathom);color:var(--surface)}
+.btn.cream{background:var(--cream);color:var(--fathom)}
+.card{border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:11px;background:var(--surface)}
+.card h5{margin:0;font-size:16px;font-weight:600}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.call{border:1.5px dashed var(--glow);background:var(--pending-bg);border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:8px}
+.call-who{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--glow-ink)}
+.call-body{font-size:13.5px;line-height:1.5}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px}
+.quiet-banner{display:flex;gap:10px;padding:9px 12px;border-radius:12px;background:var(--late-soft);color:var(--pulse);font-size:12.5px}
+.hero{background:var(--fathom);color:var(--cream);border-radius:24px;padding:24px 28px}
+.hero .sub{font-size:12px;color:var(--fathom-ink)}
+.numeral{font-family:var(--serif);font-weight:400;font-size:112px;line-height:.78;letter-spacing:-4px;font-feature-settings:"lnum" 1,"tnum" 1}
+.nlab{font-family:var(--serif);font-size:27px;line-height:1.05;letter-spacing:-.6px}
+.tabs{display:inline-flex;position:relative;padding:3px;border-radius:11px;background:var(--raised)}
+.tabs span{position:relative;z-index:1;height:34px;padding:0 13px;display:inline-flex;align-items:center;border-radius:9px;color:var(--ink-2);font-size:12.5px;font-weight:500;white-space:nowrap}
+.tabs span.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(26,26,26,.08)}
+.askbar{flex:1 1 300px;display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line-2);background:var(--canvas);color:var(--ink-2);font-size:13px;min-width:0;white-space:nowrap;overflow:hidden}
+.askbar .k{margin-left:auto;font:500 12px var(--mono)}
+.gh1{font:400 34px/1.02 var(--serif);letter-spacing:-1px;margin:0}
+.lede{margin:6px 0 0;font-size:14px;color:var(--ink-2)}
+.lede strong{color:var(--ink);font-weight:600}
+.label{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-2)}
+pre.query{margin:0;padding:12px 14px;border-radius:12px;background:var(--ink);color:#E9E7DA;font:400 11.5px/1.6 var(--mono);white-space:pre-wrap;overflow-x:auto;word-break:break-word}
+.input{flex:1;display:flex;align-items:center;height:42px;border-radius:12px;border:1px solid var(--line-2);background:var(--surface);padding:0 14px;font-size:14px;color:var(--ink);min-width:0;overflow:hidden;white-space:nowrap}
+.heat{display:grid;grid-template-columns:118px repeat(3,minmax(0,1fr));gap:5px;font-size:12px}
+.heat .cell{border-radius:8px;padding:8px 0;text-align:center;font-weight:600}
+table.cmp{width:100%;border-collapse:collapse;font-size:13px}
+table.cmp th,table.cmp td{padding:8px 14px;text-align:left;border-top:1px solid var(--line);font-weight:500}
+table.cmp thead th{border-top:none;font-weight:600}
+table.cmp td.r{background:var(--surface-2)}table.cmp td.s{background:var(--dawn-soft)}
+
+/* ---------- motion primitives (all paused until a scene scrolls into view) ---------- */
+.a{animation-duration:.6s;animation-timing-function:var(--ease);animation-fill-mode:both;animation-delay:calc(var(--t,0)*1s)}
+.rise{animation-name:rise;animation-duration:.7s}.fade{animation-name:fade}.pop{animation-name:pop;animation-duration:.5s}.out{animation-name:out;animation-duration:.35s;animation-timing-function:ease}
+.slide{animation-name:slideIn;animation-duration:.6s}
+.inout{animation:fade .4s var(--ease) both,out .3s ease both;animation-delay:calc(var(--t)*1s),calc(var(--t2)*1s)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes out{to{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.86)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(36px)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes press{0%,100%{transform:none}45%{transform:scale(.94);filter:brightness(.88)}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes hl{to{background-size:100% 100%}}
+@keyframes ringpulse{0%{opacity:0;transform:scale(.7)}10%{opacity:.9}100%{opacity:0;transform:scale(2.6)}}
+@keyframes blink{50%{opacity:0}}
+@keyframes collapse{to{max-height:0;opacity:0;padding-top:0;padding-bottom:0;margin-top:-11px;border-width:0}}
+@property --n{syntax:"<integer>";inherits:false;initial-value:0}
+.count{counter-reset:n var(--n)}.count::after{content:counter(n)}
+
+/* cursor */
+.tap{position:relative;display:inline-flex}
+.tap>.btn{animation:press .32s ease both;animation-delay:calc(var(--t)*1s)}
+.cursor{position:absolute;left:56%;top:52%;width:22px;height:26px;z-index:9;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='26' viewBox='0 0 22 26'%3E%3Cpath d='M2 2 L2 20.5 L7 16 L10.6 23.8 L13.7 22.4 L10.2 14.8 L17 14.8 Z' fill='%231A1A1A' stroke='%23FFFEF8' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat;
+  margin:-2px 0 0 -2px;animation:cur 1.7s var(--ease) both;animation-delay:calc(var(--t)*1s - .95s)}
+.cursor::before{content:"";position:absolute;left:-12px;top:-12px;width:28px;height:28px;border-radius:50%;background:rgba(3,79,70,.28);opacity:0;animation:curring 1.7s ease-out both;animation-delay:inherit}
+@keyframes cur{0%{opacity:0;transform:translate(70px,48px)}14%{opacity:1}55%{transform:translate(0,0)}60%{transform:scale(.82)}68%{transform:scale(1)}86%{opacity:1;transform:none}100%{opacity:0;transform:translate(3px,5px)}}
+@keyframes curring{0%,57%{opacity:0;transform:scale(.2)}62%{opacity:1}90%,100%{opacity:0;transform:scale(1.7)}}
+
+/* streamed words and typed text */
+.w{animation:fade .32s ease both}
+.typed{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;max-width:var(--w,600px);animation:type 1s both;animation-delay:calc(var(--t)*1s)}
+@keyframes type{from{max-width:0}to{max-width:var(--w,600px)}}
+.caret{display:inline-block;width:1.5px;height:17px;background:var(--fathom);vertical-align:-3px;margin-left:1px;animation:fade .1s both,blink 1s steps(1) 4,out .1s both;animation-delay:calc(var(--t)*1s),calc(var(--t)*1s),calc(var(--t2)*1s)}
+
+/* ---------- graphs (built by JS from small specs) ---------- */
+.graph{display:block;width:100%;height:auto;overflow:visible}
+.graph .ln{fill:none;stroke:rgba(26,26,26,.26);stroke-width:1.3;stroke-dasharray:1 1;stroke-dashoffset:1;animation:draw .7s var(--ease) both;animation-delay:calc(var(--t)*1s)}
+.graph .ar{fill:rgba(26,26,26,.4);animation:fade .25s ease both;animation-delay:calc(var(--t)*1s + .5s)}
+.graph .el{font:500 8.5px var(--mono);fill:var(--ink-2);letter-spacing:.4px;animation:fade .4s ease both;animation-delay:calc(var(--t)*1s + .3s)}
+.graph .nb{transform-box:fill-box;transform-origin:center;animation:pop .55s var(--ease) both;animation-delay:calc(var(--t)*1s)}
+.graph rect{fill:var(--surface);stroke:var(--line-2);stroke-width:1}
+.graph .nt{font:600 12px var(--sans);text-anchor:middle;fill:var(--ink)}
+.graph .ns{font:500 9px var(--mono);text-anchor:middle;fill:var(--ink-2)}
+.graph .k-sku .nt,.graph .k-po .nt{font:500 11px var(--mono)}
+.k-sup rect{fill:var(--vendor-soft);stroke:rgba(3,79,70,.22)}.k-sup .nt{fill:var(--fathom)}
+.k-po rect{fill:var(--po-soft);stroke:rgba(51,51,31,.18)}.k-po .nt{fill:var(--po-ink)}
+.k-style rect{fill:var(--style-soft);stroke:rgba(107,58,0,.18)}.k-style .nt{fill:var(--style-ink)}
+.k-drop rect{fill:var(--flare-soft);stroke:rgba(138,42,18,.2)}.k-drop .nt{fill:var(--flare-ink)}
+.k-post rect{fill:var(--signal-soft);stroke:rgba(138,44,116,.18)}.k-post .nt{fill:var(--signal-ink)}
+.k-ci rect{fill:var(--surface);stroke:var(--fathom);stroke-width:1.4}.k-ci .nt{fill:var(--fathom)}
+.k-dec rect{fill:#f3d9df;stroke:rgba(127,28,52,.2)}.k-dec .nt{fill:var(--pulse)}
+.k-mate rect{fill:var(--dawn);stroke:rgba(74,31,112,.18)}.k-mate .nt{fill:var(--dawn-ink)}
+.k-call rect{fill:var(--pending-bg);stroke:var(--glow);stroke-dasharray:4 3}.k-call .nt{fill:var(--glow-ink)}
+.k-msg rect{fill:var(--surface)}.k-msg .nt{fill:var(--ink-2)}
+.k-sample rect{fill:var(--raised)}
+.k-blate rect{fill:var(--late-soft);stroke:none}.k-blate .nt{fill:var(--pulse);font:700 10.5px var(--sans)}
+.k-bok rect{fill:var(--ok-soft);stroke:none}.k-bok .nt{fill:var(--ok-ink);font:700 10.5px var(--sans)}
+.k-tag rect{fill:var(--glow-soft);stroke:none}.k-tag .nt{fill:var(--glow-ink);font:600 11px var(--sans)}
+.n.ctx{opacity:.42}
+.graph .hot{fill:none;stroke:var(--hot);stroke-width:2.2;stroke-dasharray:1 1;stroke-dashoffset:1;animation:draw .42s var(--io) both;animation-delay:calc(var(--h)*1s)}
+.n.hot rect{animation:hotR .4s ease both;animation-delay:calc(var(--h)*1s)}
+.n.hot .nt,.n.hot .ns{animation:hotT .4s ease both;animation-delay:calc(var(--h)*1s)}
+@keyframes hotR{to{fill:var(--late-soft);stroke:var(--hot);stroke-width:1.6}}
+@keyframes hotT{to{fill:var(--pulse)}}
+.graph .ring{fill:none;stroke:var(--hot);stroke-width:1.6;transform-box:fill-box;transform-origin:center;animation:ringpulse 1.2s ease-out both;animation-delay:calc(var(--h)*1s)}
+.graph .strike{stroke:var(--pulse);stroke-width:1.2;transform-box:fill-box;transform-origin:left center;animation:grow .35s var(--ease) both;animation-delay:calc(var(--h)*1s + .25s)}
+
+/* ===================== scene: the problem ===================== */
+.pb{background:var(--raised);background-image:radial-gradient(rgba(26,26,26,.07) 1px,transparent 1.2px);background-size:16px 16px;display:flex;flex-direction:column;gap:14px}
+.win{background:var(--surface);border-radius:16px;box-shadow:0 0 0 1px var(--line),0 14px 30px -18px rgba(26,26,26,.35);overflow:hidden}
+.wbar{display:flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-bottom:1px solid var(--line);font-size:12px;font-weight:600;background:var(--surface-2)}
+.wbar i{width:8px;height:8px;border-radius:50%;background:var(--raised)}
+.wbar span{margin-left:6px}
+.wbar em{margin-left:auto;font-style:normal;font-weight:500;font-size:11px;color:var(--ink-2)}
+.phone{background:var(--ink);border-radius:38px;padding:8px;height:430px;max-width:300px;width:100%;margin:0 auto;box-shadow:0 22px 40px -20px rgba(26,26,26,.5)}
+.ph-s{background:var(--surface);border-radius:30px;height:100%;overflow:hidden;display:flex;flex-direction:column}
+.ph-top{display:flex;justify-content:space-between;padding:11px 22px 0;font:600 11px var(--sans)}
+.ph-title{display:flex;align-items:baseline;justify-content:space-between;padding:8px 16px 8px;font:700 21px var(--sans)}
+.ph-title small{font:500 11px var(--sans);color:var(--ink-2)}
+.ph-list{position:relative;flex:1;overflow:hidden;border-top:1px solid var(--line)}
+.crow{position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--surface)}
+.cav{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font:600 12px var(--sans)}
+.cmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ctop{display:flex;justify-content:space-between;gap:6px;font-size:13px}
+.ctop b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctime{font-size:10.5px;color:var(--ink-2);flex-shrink:0}
+.cprev{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;min-width:0}
+.cprev>*{overflow:hidden;text-overflow:ellipsis}
+.cprev .typing{color:var(--fathom);font-style:italic}
+.cprev .news{color:var(--ink);font-weight:600}
+.cbadge{flex-shrink:0;min-width:20px;text-align:right}
+.cbadge b{display:inline-block;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--fathom);color:var(--cream);font:700 10.5px/18px var(--sans);text-align:center}
+.crow .hlx{position:absolute;inset:3px 4px;border:1.5px dashed var(--glow);border-radius:12px;background:var(--pending-bg);z-index:-1}
+.crow.sl{z-index:2}.crow.kg{z-index:3}.crow.bd{z-index:4}.crow.shh{z-index:5}.crow.pk{z-index:6}.crow.ic{z-index:7}
+.crow.sl{isolation:isolate}
+.crow.sl .dim{animation:dim .6s ease both;animation-delay:6.6s}
+@keyframes dim{to{opacity:.5}}
+.xl .g5{display:grid;grid-template-columns:22px 56px minmax(0,1fr) 72px 50px 62px;font-size:11px}
+.xl .g5>*{padding:0 6px;height:24px;line-height:24px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.xl .g5 .gh{background:var(--surface-2);color:var(--ink-2);text-align:center;font:500 10px/20px var(--mono);height:20px}
+.xl .g5 .rn{background:var(--surface-2);color:var(--ink-2);text-align:center;font:500 10px/24px var(--mono);padding:0}
+.xl .g5 b{font-weight:600}
+.xl .g5 .m{font-family:var(--mono);font-size:10.5px}
+.xl .st{font-weight:600}.xl .st.ok{color:var(--ok-ink);background:#EAF8E7}.xl .st.q{color:var(--glow-ink);background:#FFF4E2}
+.ringx{position:absolute;inset:2px;border:1.5px solid var(--hot);border-radius:4px;animation:pop .35s var(--ease) both;animation-delay:calc(var(--t)*1s)}
+.wfoot{padding:6px 10px;font-size:11px;color:var(--ink-2)}
+.shop-b{padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.shop-b .ttl{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.shop-b .ttl .serif{font-size:22px;letter-spacing:-.4px}
+.sched{position:relative;background:var(--raised);color:var(--ink);font-weight:600}
+.prod{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;font-size:12.5px}
+.prod .sws{display:flex;gap:3px}.prod .sws i{width:20px;height:20px;border-radius:6px}
+.prod .nm{display:flex;flex-direction:column;line-height:1.25}.prod .nm small{color:var(--ink-2);font-size:11px}
+.prod .mono{font-size:11.5px}
+.ig .posts{padding:10px;display:flex;flex-direction:column;gap:10px}
+.post{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.post .ph{display:flex;align-items:center;gap:6px;font-size:11.5px}
+.post .ph b{font-weight:600}.post .ph .muted{margin-left:auto;font-size:10.5px}
+.pav{width:20px;height:20px;border-radius:50%;background:var(--signal-soft);color:var(--signal-ink);font:700 10px/20px var(--sans);text-align:center}
+.pimg{height:62px;border-radius:8px;background:linear-gradient(140deg,#262624,#0F0F0E);color:var(--cream);display:flex;flex-direction:column;justify-content:space-between;padding:7px 9px}
+.pimg .serif{font-style:italic;font-size:17px;line-height:1}
+.pl{position:relative;align-self:flex-start;font:600 10px var(--sans);background:rgba(255,255,235,.16);border-radius:999px;padding:2px 8px}
+.pl .ringx{inset:-2px;border-radius:999px}
+.pcap{font-size:11px;color:var(--ink-2)}
+.verdict{background:var(--ink);color:var(--cream);border-radius:14px;display:flex;align-items:center;justify-content:center;padding:12px 16px;text-align:center}
+.verdict span{font:italic 400 21px/1.15 var(--serif);letter-spacing:-.3px}
+.pb .shop{display:none}
+@media (min-width:720px){
+  .pb{display:block}
+  .pb .phone{left:36px;top:28px;width:262px;height:484px;max-width:none;margin:0}
+  .pb .xl{left:326px;top:28px;width:372px}
+  .pb .shop{display:block;left:326px;top:270px;width:372px}
+  .pb .ig{left:726px;top:28px;width:198px;height:484px}
+  .pb .verdict{left:326px;top:462px;width:372px;height:50px}
+}
+@media (max-width:719px){.xl .g5{grid-template-columns:22px 54px minmax(0,1fr) 46px 60px}.xl .g5 .sup{display:none}.ig .posts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.post .ph .muted{display:none}.pimg .serif{font-size:13px}}
+
+/* ===================== scene: the graph ===================== */
+.gs{background:var(--surface)}
+.gs .g-m{display:block}.gs .g-d{display:none}
+.frag{display:none}
+.gs-head{margin-bottom:8px}
+.gs-head .serif{font-size:26px;letter-spacing:-.5px;line-height:1.1}
+.mates{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+.mate{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--surface)}
+.mate .av{width:36px;height:36px;border-radius:10px;font-size:21px}
+.mate b{font-weight:600;font-size:14.5px}
+.mate .role{font-size:12px;color:var(--ink-2)}
+.mate p{margin:3px 0 0;font-size:12.5px;line-height:1.4;color:var(--ink-2)}
+@media (min-width:720px){
+  .gs .g-m{display:none}.gs .g-d{display:block;position:absolute;left:0;top:0;width:960px;height:410px}
+  .frag{display:block;position:absolute;left:0;top:0;z-index:3;transform:translate(calc(var(--x0)*1px),calc(var(--y0)*1px)) translate(-50%,-50%) rotate(calc(var(--r)*1deg));animation:fly 1s cubic-bezier(.6,0,.2,1) both;animation-delay:calc(var(--f)*1s)}
+  .frag>.fi{animation:pop .55s var(--ease) both;animation-delay:calc(var(--t)*1s)}
+  .gs-head{position:absolute;right:30px;top:24px;text-align:right;margin:0}
+  .mates{position:absolute;left:28px;right:28px;top:424px;grid-template-columns:repeat(3,1fr);gap:14px;margin:0}
+}
+@keyframes fly{0%{opacity:1}75%{opacity:1}100%{opacity:0;transform:translate(calc(var(--x1)*1px),calc(var(--y1)*1px)) translate(-50%,-50%) rotate(0deg) scale(.5)}}
+.fb{background:var(--surface);border-radius:12px;box-shadow:0 0 0 1px var(--line),0 10px 24px -14px rgba(26,26,26,.4);padding:8px 11px;font-size:12px;white-space:nowrap}
+.fb.chat{border-radius:14px 14px 14px 4px;max-width:230px}
+.fb.chat small{display:block;color:var(--fathom);font-weight:600;font-size:10.5px;margin-bottom:2px}
+.fb.row5{display:flex;padding:0;overflow:hidden;font:500 10.5px var(--mono)}
+.fb.row5 span{padding:6px 8px;border-right:1px solid var(--line)}
+.fb.dark{background:linear-gradient(140deg,#262624,#0F0F0E);color:var(--cream)}
+
+/* ===================== scene: today ===================== */
+.app{background:var(--surface);display:flex;flex-direction:column;gap:14px}
+.app .topb{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.app .hero{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-end}
+.hero .hl{display:flex;flex-direction:column;gap:12px;flex:1 1 300px}
+.hero .hr{display:flex;flex-direction:column;gap:9px;flex:1 1 280px;font-size:13.5px}
+.nrow{display:flex;align-items:flex-end;gap:16px}
+.cd13{--n:13;animation:cd 1.6s cubic-bezier(.16,.84,.3,1) both;animation-delay:.9s}
+@keyframes cd{from{--n:31}to{--n:13}}
+.grid2{display:grid;grid-template-columns:1fr;gap:14px}
+.bar{display:block;width:96px;height:8px;border-radius:6px;background:var(--raised);overflow:hidden}
+.bar i{display:block;height:8px;transform-origin:left;animation:grow .9s var(--ease) both;animation-delay:calc(var(--t)*1s)}
+@media (min-width:720px){.app{padding:20px 28px}.grid2{grid-template-columns:1fr 1fr}.app .hero{padding:24px 30px}}
+
+/* ===================== scene: check-in ===================== */
+.ci{background:var(--surface);display:flex;flex-direction:column;gap:14px}
+.ci-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ci-h h6{margin:0;font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ci-h h6 i{width:10px;height:10px;border-radius:3px;background:var(--fathom)}
+.ci-h p{margin:3px 0 0;font-size:12.5px;color:var(--ink-2)}
+.cicard{border:1px solid var(--fathom);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--surface);animation:unline .5s ease both;animation-delay:3.7s}
+@keyframes unline{to{border-color:var(--line)}}
+.cicard .q{font-size:18px;font-weight:600}
+.pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow:hidden;max-height:0;animation:open .5s var(--ease) both;animation-delay:2.15s}
+@keyframes open{from{max-height:0;opacity:0}to{max-height:60px;opacity:1}}
+.dinput{display:inline-flex;align-items:center;gap:10px;height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line-2);font:500 14px var(--mono)}
+.dinput svg{width:15px;height:15px;color:var(--ink-2)}
+.chat{border:1px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--surface-2)}
+.msg{max-width:88%;padding:8px 11px;border-radius:14px;font-size:12.5px;line-height:1.45;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.msg small{display:block;font-size:10.5px;font-weight:600;color:var(--ink-2);margin-bottom:1px}
+.msg.me{align-self:flex-end;background:var(--raised);box-shadow:none}
+.msg.sup small{color:var(--fathom)}
+.ansc{margin-top:6px;border:1.5px dashed var(--glow);background:var(--pending-bg);border-radius:10px;padding:6px 9px;font-size:12px;font-weight:600;color:var(--glow-ink)}
+.minipo{border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--surface)}
+@media (min-width:720px){
+  .ci{display:block}
+  .ci .ci-h{left:28px;right:28px;top:22px}
+  .ci .left{left:28px;top:96px;width:520px;display:flex;flex-direction:column;gap:12px}
+  .ci .right{left:574px;top:96px;width:358px;display:flex;flex-direction:column;gap:12px}
+}
+
+/* ===================== scene: impact ===================== */
+.im{background:var(--canvas);display:flex;flex-direction:column;gap:14px}
+.strip{display:flex;flex-direction:column;gap:10px;padding:18px 22px}
+.strip .numeral{font-size:66px;letter-spacing:-2.5px}
+.strip .nlab{font-size:20px}
+.newcall{max-height:0;overflow:hidden;animation:grow2 .7s var(--ease) both;animation-delay:.9s}
+@keyframes grow2{from{max-height:0;opacity:0}to{max-height:320px;opacity:1}}
+mark{color:inherit;background:linear-gradient(var(--late-soft),var(--late-soft)) no-repeat 0 0/0% 100%;-webkit-box-decoration-break:clone;box-decoration-break:clone;border-radius:3px;animation:hl .7s var(--ease) both;animation-delay:calc(var(--t)*1s)}
+.gpan{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px 14px 6px;display:flex;flex-direction:column;gap:6px}
+.gpan .gph{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 4px}
+@media (min-width:720px){
+  .im{display:block}
+  .im .left{left:28px;top:28px;width:404px;display:flex;flex-direction:column;gap:14px}
+  .im .gpan{left:452px;top:28px;width:480px;height:484px}
+}
+
+/* ===================== scene: scenario ===================== */
+.sc{background:var(--surface);display:flex;flex-direction:column;gap:12px}
+.sc .h1x{font:400 30px/1.05 var(--serif);letter-spacing:-.8px;margin:4px 0 0}
+.sc .h1x em{color:var(--dawn-ink)}
+.sc .lede{font-size:13px}
+.panels{display:flex;flex-direction:column;gap:12px;position:relative}
+.gp{border:1px solid var(--line);border-radius:18px;padding:10px 12px 4px;background:var(--surface);position:relative}
+.gp .gph{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;font-weight:600;padding:0 2px 2px}
+.gp.scn{animation:rise .7s var(--ease) both,tint .8s ease both;animation-delay:1.3s,1.9s}
+@keyframes tint{to{background:var(--dawn-soft);border-color:rgba(74,31,112,.28)}}
+@keyframes untint{from{background:var(--dawn-soft);border-color:rgba(74,31,112,.28)}to{background:var(--surface);border-color:var(--line)}}
+.copychip{align-self:center;background:var(--ink);color:var(--cream);font:500 11px var(--mono);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.applied{border:1.5px solid var(--fathom);background:var(--surface-2);border-radius:14px;padding:13px;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5}
+.confirm{border:1.5px solid var(--fathom);background:var(--surface-2);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:12.5px;line-height:1.45;box-shadow:0 18px 40px -16px rgba(26,26,26,.35)}
+.tblw{border:1px solid var(--line);border-radius:18px;overflow:hidden;overflow-x:auto}
+.sc .acts{display:flex;gap:8px}
+@media (min-width:720px){
+  .sc{display:block}
+  .sc .sch{left:28px;top:20px;width:640px}
+  .sc .acts{right:28px;top:28px}
+  .sc .confirm{right:28px;top:80px;width:350px;z-index:8}
+  .sc .chips{left:28px;top:100px;right:28px}
+  .sc .panels{left:28px;top:136px;width:904px;height:198px;display:block}
+  .panels>*{position:absolute}
+  .panels .gp.real{left:0;top:0;width:440px;height:198px}
+  .panels .mv{left:464px;top:0;width:440px;height:198px;animation:back .9s cubic-bezier(.6,0,.2,1) both;animation-delay:8.25s;z-index:2}
+  .panels .gp.scn{width:440px;height:198px;animation:lift 1.25s cubic-bezier(.6,0,.2,1) both,tint .8s ease both,untint .6s ease both;animation-delay:1.25s,1.9s,8.75s}
+  .panels .copychip{left:452px;top:-11px;transform:translateX(-50%);z-index:4}
+  .panels .applied{left:464px;top:20px;width:440px}
+  .sc .tblw{left:28px;top:346px;width:904px}
+}
+@keyframes lift{0%{opacity:0;transform:translateX(-464px)}18%{opacity:1;transform:translate(-464px,-8px) scale(1.01);box-shadow:0 20px 40px -20px rgba(74,31,112,.45)}100%{transform:none}}
+@keyframes back{to{transform:translateX(-464px)}}
+
+/* ===================== scene: ask ===================== */
+.ak{background:var(--canvas);display:flex;flex-direction:column;gap:14px}
+.ghost-app{display:none}
+.keys{display:none}
+.askp{background:var(--surface);border:1px solid var(--line-2);border-radius:22px;box-shadow:0 20px 60px rgba(26,26,26,.16);display:flex;flex-direction:column;overflow:hidden;min-height:440px}
+.askp .ph{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:nowrap}
+.askp .ph b{font-size:15px;white-space:nowrap}
+.askp .ph .muted{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.askp .ph .esc{margin-left:auto;font-size:12px;color:var(--ink-2);font-weight:600}
+.askp .pbody{flex:1;position:relative;overflow:hidden}
+.askp .scroll{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.askp .pform{display:flex;gap:10px;padding:12px;border-top:1px solid var(--line)}
+.ubub{align-self:flex-end;background:var(--raised);border-radius:14px;padding:7px 12px;font-size:13.5px;max-width:85%}
+.ans{display:flex;gap:10px}
+.ans .avatar{width:28px;height:28px;font-size:16px;border-radius:7px}
+.ans .bd{display:flex;flex-direction:column;gap:8px;min-width:0}
+.bubble{font-size:14px;line-height:1.6}
+.bubble strong{font-weight:600}
+.sugg{display:flex;flex-direction:column;gap:8px}
+.sugg .btn{justify-content:flex-start;height:auto;padding:9px 12px;white-space:normal;font-size:13px}
+.why{display:flex;flex-direction:column;gap:8px}
+.why .q{font-size:11.5px;color:var(--ink-2)}
+.ph-swap{color:var(--ink-2)}
+.pathstrip{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--ink-2)}
+.pathstrip .arr{font:500 9.5px var(--mono);letter-spacing:.3px}
+@media (min-width:720px){
+  .ak{display:block}
+  .ak .ghost-app{display:block;left:28px;top:28px;width:420px;height:484px;border-radius:22px;background:var(--surface);box-shadow:0 0 0 1px var(--line);padding:22px;opacity:.55}
+  .ak .keys{display:flex;left:152px;top:226px;gap:12px;z-index:3}
+  .ak .askp{left:420px;top:16px;width:520px;height:508px;min-height:0}
+  .ak .scroll{animation:scrollup .8s var(--ease) both;animation-delay:7.95s}
+}
+@keyframes scrollup{to{transform:translateY(-178px)}}
+.kc{width:66px;height:66px;border-radius:16px;background:var(--surface);box-shadow:0 0 0 1px var(--line-2),0 4px 0 var(--raised),0 16px 30px -14px rgba(26,26,26,.4);display:flex;align-items:center;justify-content:center;font:500 26px var(--sans);animation:keyp .3s ease both;animation-delay:.62s}
+.kc+.kc{animation-delay:.68s}
+@keyframes keyp{50%{transform:translateY(3px);box-shadow:0 0 0 1px var(--line-2),0 1px 0 var(--raised),0 8px 16px -10px rgba(26,26,26,.4);background:var(--surface-2)}}
+
+/* ===================== scene: live ===================== */
+.lv .hero{position:relative}
+.lv .layers{display:grid}.lv .layers>*{grid-area:1/1}
+.lv .cdl{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between}
+.lv .lvl{display:flex;flex-wrap:wrap;gap:26px;justify-content:space-between}
+.lv .stats{display:flex;flex-wrap:wrap;gap:22px;margin-top:4px}
+.lv .stats .mono{font-size:19px}
+.p62{--n:62;animation:p62 1.5s cubic-bezier(.16,.84,.3,1) both;animation-delay:1.75s}
+@keyframes p62{from{--n:0}to{--n:62}}
+.heat .cell{position:relative;animation:pop .45s var(--ease) both;animation-delay:calc(2.35s + var(--i)*.07s)}
+.heat .rl{align-self:center;white-space:nowrap;animation:fade .4s ease both;animation-delay:calc(2.3s + var(--i)*.21s)}
+.soring{position:absolute;inset:-3px;border:2px solid var(--cream);border-radius:10px;animation:ringpulse 1.3s ease-out both;animation-delay:3.65s}
+.olive{position:relative}
+.olive::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--glow);margin-right:6px;vertical-align:1px;animation:pop .4s ease both;animation-delay:4s}
+.tabhl{position:absolute;left:3px;top:3px;height:34px;width:var(--w1,140px);border-radius:9px;background:var(--surface);box-shadow:0 1px 2px rgba(26,26,26,.08);animation:tabmove .45s var(--ease) both;animation-delay:1.05s}
+@keyframes tabmove{to{transform:translateX(var(--w1,140px));width:var(--w2,120px)}}
+.lv .tabs span.on{background:transparent;box-shadow:none}
+.grid3{display:grid;grid-template-columns:1fr;gap:14px}
+@media (min-width:720px){.grid3{grid-template-columns:repeat(3,1fr)}.lv .hero{padding:24px 30px}}
+
+/* ===================== scene: pattern ===================== */
+.pt{background:var(--canvas);display:flex;flex-direction:column;gap:14px}
+.pt .right{display:flex;flex-direction:column;gap:14px}
+.callwrap{max-height:260px;overflow:hidden;animation:collapse .5s var(--ease) both;animation-delay:7.9s}
+.newpo{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:7px;background:var(--surface);animation:rise .6s var(--ease) both;animation-delay:8.15s}
+@media (min-width:720px){
+  .pt{display:block}
+  .pt .askp{left:20px;top:16px;width:548px;height:508px;min-height:0}
+  .pt .right{left:588px;top:28px;width:350px}
+}
+
+/* ===================== model + under the hood ===================== */
+.model{background:var(--surface);padding:22px 18px 14px}
+.model .g-d{display:none}
+@media (min-width:720px){.model{padding:30px 34px 22px}.model .g-d{display:block}.model .g-m{display:none}}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;font-size:12px;color:var(--ink-2)}
+.qgrid{max-width:992px;margin:28px auto 0;padding:0 16px;display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:860px){.qgrid{grid-template-columns:1fr 1fr}}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.qcard .label{color:var(--fathom)}
+.qcard h4{margin:0;font:400 25px/1.1 var(--serif);letter-spacing:-.4px}
+.qcard p{margin:0;font-size:15px;line-height:1.55;color:var(--ink-2)}
+.qcard pre.query{font-size:11.5px}
+.qcard.wide{grid-column:1/-1}
+.lesson{max-width:960px;margin:16px auto 0;border:1.5px dashed var(--glow);background:var(--pending-bg);border-radius:22px;padding:22px;display:flex;flex-direction:column;gap:10px}
+.lesson-wrap{padding:0 16px}
+.lesson p{margin:0;font-size:15px;line-height:1.55}
+.lesson .label{color:var(--glow-ink)}
+.tok-k{color:#F0D7FF;font-weight:600}.tok-l{color:#CFE6E1}.tok-s{color:#FFD9A8}.tok-c{color:#8F8D84}.tok-f{color:#FFE3F8}
+
+@media (prefers-reduced-motion:reduce){
+  .weave .thread{animation:none;stroke-dashoffset:0}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <a class="brand" href="https://github.com/KshitijBhardwaj18/weft"><span class="sq"></span>Weft</a>
+  <a class="gh" href="https://github.com/KshitijBhardwaj18/weft">Code on GitHub &rarr;</a>
+</div>
+
+<header class="hero-a">
+  <div class="col">
+    <div class="kicker"><span class="sq"></span>Built for FalkorDB Graph Hacks</div>
+    <h1>One live plan for every <em>drop</em></h1>
+    <p class="dek">A D2C product is planned, made, sold and restocked, and each stage lives in a different tool. Weft keeps one live plan per drop, from the first sample to the next restock, as a FalkorDB graph, with AI teammates that chase the updates and show what every change breaks.</p>
+    <div class="byline"><b>Kshitij Bhardwaj</b><span class="dot"></span><span>Built for FalkorDB Graph Hacks</span><span class="dot"></span><span>8 minute read</span></div>
+  </div>
+  <svg class="weave" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g class="warp" id="warp"></g>
+    <path class="thread" pathLength="1" stroke="#034F46" d="M-20 40 C 80 28, 140 52, 240 40 S 400 28, 500 40 S 660 52, 760 40 S 920 28, 1020 40 S 1160 52, 1220 40"/>
+    <path class="thread" pathLength="1" stroke="#4A1F70" style="animation-delay:.25s" d="M-20 64 C 80 76, 140 52, 240 64 S 400 76, 500 64 S 660 52, 760 64 S 920 76, 1020 64 S 1160 52, 1220 64"/>
+    <path class="thread" pathLength="1" stroke="#E08A1E" style="animation-delay:.5s" d="M-20 88 C 80 76, 140 100, 240 88 S 400 76, 500 88 S 660 100, 760 88 S 920 76, 1020 88 S 1160 100, 1220 88"/>
+  </svg>
+</header>
+
+<!-- ===================================================== 1. THE PROBLEM -->
+<section class="ch" id="problem">
+  <div class="col">
+    <div class="kicker reveal"><span class="sq"></span>The problem</div>
+    <h2 class="reveal">Thirteen days before the drop, the fabric is late</h2>
+    <p class="lead-in reveal">Kshitij is launching a premium fitness-wear brand. The first collection, the <b>Black Drop</b>, is 3 styles, 15 SKUs and 2,100 units, and it goes live on 1 December.</p>
+    <p class="reveal">The leggings and the sports bra come from Sri Lakshmi Knits in Tiruppur. The tanks come from Kavya Garments in Bengaluru. Three creators, Ria, Dev and Tara, have scheduled posts telling their followers the drop goes live on 1 December.</p>
+    <p class="reveal">On 18 November, Murugan at Sri Lakshmi sends one line to a WhatsApp group: the leggings fabric is delayed, coming on the 28th.</p>
+  </div>
+
+  <figure class="scene" id="s-problem">
+    <div class="stage fix" role="img" aria-label="Four tools side by side. In a phone's chat list, the message 'Sir, fabric delayed. Coming 28th.' arrives and is pushed down by five newer chats. The spreadsheet still says PO-014 is on track for 20 Nov, the shop is scheduled for 1 Dec, and three creator posts still say live 1 Dec.">
+      <div class="inner ui pb d-abs">
+        <div class="phone a rise" style="--t:.05">
+          <div class="ph-s">
+            <div class="ph-top"><span>10:42</span><span>WhatsApp</span></div>
+            <div class="ph-title">Chats <small>7 groups</small></div>
+            <div class="ph-list">
+              <div class="crow bd" data-slots="0@0,1@2.4,2@4,0@4.5,1@5,2@5.5,3@6"><span class="cav" style="background:var(--po-soft);color:var(--po-ink)">BD</span><div class="cmain"><div class="ctop"><b>Black Drop · core team</b><span class="ctime swap"><span class="a out" style="--t:4.5">10:31</span><span class="a fade" style="--t:4.5">10:44</span></span></div><div class="cprev swap"><span class="a out" style="--t:4.5">Priya: creators confirmed for 25 Nov</span><span class="a fade" style="--t:4.5">Priya: is the shoot still on 22 Nov?</span></div></div><span class="cbadge swap"><b class="a out" style="--t:4.5">4</b><b class="a pop" style="--t:4.5">5</b></span></div>
+              <div class="crow sl" data-slots="1@0,0@2.4,1@4,2@4.5,3@5,4@5.5,5@6"><i class="hlx a fade" style="--t:2.4"></i><span class="cav dim" style="background:var(--vendor-soft);color:var(--fathom)">SL</span><div class="cmain dim"><div class="ctop"><b>Sri Lakshmi · PO-014</b><span class="ctime swap"><span class="a out" style="--t:2.4">Mon</span><span class="a fade" style="--t:2.4">10:42</span></span></div><div class="cprev swap"><span class="a out" style="--t:1.6">Murugan: Received sir. Dispatch by 20 Nov.</span><span class="typing inout" style="--t:1.6;--t2:2.4">Murugan is typing…</span><span class="news a fade" style="--t:2.45">Murugan: Sir, fabric delayed. Coming 28th.</span></div></div><span class="cbadge"><b class="a pop" style="--t:2.45">1</b></span></div>
+              <div class="crow kg" data-slots="2@0,0@4,1@4.5,2@5,3@5.5,4@6"><span class="cav" style="background:var(--vendor-soft);color:var(--fathom)">KG</span><div class="cmain"><div class="ctop"><b>Kavya Garments</b><span class="ctime swap"><span class="a out" style="--t:4">09:58</span><span class="a fade" style="--t:4">10:43</span></span></div><div class="cprev swap"><span class="a out" style="--t:4">Kavya: Black tank stitching starts Monday.</span><span class="a fade" style="--t:4">Kavya: tank QC photos sent</span></div></div><span class="cbadge"><b class="a pop" style="--t:4">2</b></span></div>
+              <div class="crow shh" data-slots="3@0,0@5,1@5.5,2@6"><span class="cav" style="background:var(--style-soft);color:var(--style-ink)">SH</span><div class="cmain"><div class="ctop"><b>Shoot · 22 Nov</b><span class="ctime swap"><span class="a out" style="--t:5">09:40</span><span class="a fade" style="--t:5">10:45</span></span></div><div class="cprev swap"><span class="a out" style="--t:5">Arjun: recce photos from the studio</span><span class="a fade" style="--t:5">Arjun: 40 new photos</span></div></div><span class="cbadge swap"><b class="a out" style="--t:5">2</b><b class="a pop" style="--t:5">6</b></span></div>
+              <div class="crow" data-slots="4@0,5@5.5,6@6"><span class="cav" style="background:var(--raised);color:var(--ink-2)">AF</span><div class="cmain"><div class="ctop"><b>Ananya Fabrics</b><span class="ctime">Sat</span></div><div class="cprev"><span>You: please send the olive lab dip by 15 Nov</span></div></div><span class="cbadge"></span></div>
+              <div class="crow pk" data-slots="5@0,0@5.5,1@6"><span class="cav" style="background:var(--flare-soft);color:var(--flare-ink)">PK</span><div class="cmain"><div class="ctop"><b>Packaging</b><span class="ctime swap"><span class="a out" style="--t:5.5">Fri</span><span class="a fade" style="--t:5.5">10:45</span></span></div><div class="cprev swap"><span class="a out" style="--t:5.5">Box proofs v3 attached</span><span class="a fade" style="--t:5.5">Invoice for the box proofs</span></div></div><span class="cbadge"><b class="a pop" style="--t:5.5">1</b></span></div>
+              <div class="crow ic" data-slots="6@0,0@6"><span class="cav" style="background:var(--signal-soft);color:var(--signal-ink)">CR</span><div class="cmain"><div class="ctop"><b>Creators · Black Drop</b><span class="ctime swap"><span class="a out" style="--t:6">Thu</span><span class="a fade" style="--t:6">10:46</span></span></div><div class="cprev swap"><span class="a out" style="--t:6">Tara: draft caption attached</span><span class="a fade" style="--t:6">Ria: all set for 25 Nov</span></div></div><span class="cbadge"><b class="a pop" style="--t:6">3</b></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="win xl a rise" style="--t:.2">
+          <div class="wbar"><i></i><i></i><i></i><span>Black Drop tracker.xlsx</span><em>Excel</em></div>
+          <div class="g5">
+            <span class="gh"></span><span class="gh">A</span><span class="gh">B</span><span class="gh sup">C</span><span class="gh">D</span><span class="gh">E</span>
+            <span class="rn">1</span><b>PO</b><b>Style</b><b class="sup">Supplier</b><b>ETA</b><b>Status</b>
+            <span class="rn">2</span><span class="m">PO-014</span><span>Core Leggings · Black</span><span class="sup">Sri Lakshmi</span><span class="m">20 Nov<i class="ringx" style="--t:6.75"></i></span><span class="st ok">On track<i class="ringx" style="--t:6.85"></i></span>
+            <span class="rn">3</span><span class="m">PO-015</span><span>Sculpt Bra · Black</span><span class="sup">Sri Lakshmi</span><span class="m">24 Nov</span><span class="st q">QC</span>
+            <span class="rn">4</span><span class="m">PO-017</span><span>Core Leggings · Olive</span><span class="sup">Sri Lakshmi</span><span class="m">24 Nov</span><span class="st q">Cutting</span>
+            <span class="rn">5</span><span class="m">PO-018</span><span>Everyday Tank · Black</span><span class="sup">Kavya</span><span class="m">25 Nov</span><span class="st q">Stitching</span>
+            <span class="rn">6</span><span class="m">PO-019</span><span>Everyday Tank · Olive</span><span class="sup">Kavya</span><span class="m">26 Nov</span><span class="st q">Fabric</span>
+          </div>
+          <div class="wfoot">Last edited by Rohan · 12 Nov</div>
+        </div>
+
+        <div class="win shop a rise" style="--t:.35">
+          <div class="wbar"><i></i><i></i><i></i><span>Black Drop · products</span><em>Shopify</em></div>
+          <div class="shop-b">
+            <div class="ttl"><span class="serif">Black Drop</span><span class="badge sched">Scheduled · 1 Dec, 00:00<i class="ringx" style="--t:7;inset:-2px;border-radius:999px"></i></span></div>
+            <div class="prod"><span class="sws"><i style="background:#1F1F1E"></i><i style="background:#5E6136"></i></span><span class="nm"><b>Core Leggings</b><small>Black, Olive · S M L</small></span><span class="mono">1,000</span></div>
+            <div class="prod"><span class="sws"><i style="background:#1F1F1E"></i></span><span class="nm"><b>Sculpt Sports Bra</b><small>Black · S M L</small></span><span class="mono">300</span></div>
+            <div class="prod"><span class="sws"><i style="background:#1F1F1E"></i><i style="background:#5E6136"></i></span><span class="nm"><b>Everyday Tank</b><small>Black, Olive · S M L</small></span><span class="mono">800</span></div>
+          </div>
+        </div>
+
+        <div class="win ig a rise" style="--t:.5">
+          <div class="wbar"><i></i><i></i><i></i><span>Scheduled</span><em>Instagram</em></div>
+          <div class="posts">
+            <div class="post"><div class="ph"><span class="pav">R</span><b>@runwithria</b><span class="muted">25 Nov</span></div><div class="pimg"><span class="serif">The Black Drop</span><span class="pl">live 1 Dec<i class="ringx" style="--t:7.15"></i></span></div><div class="pcap">Code RIA15</div></div>
+            <div class="post"><div class="ph"><span class="pav">D</span><b>@liftwithdev</b><span class="muted">25 Nov</span></div><div class="pimg"><span class="serif">The Black Drop</span><span class="pl">live 1 Dec<i class="ringx" style="--t:7.3"></i></span></div><div class="pcap">Code DEV10</div></div>
+            <div class="post"><div class="ph"><span class="pav">T</span><b>@yogawithtara</b><span class="muted">25 Nov</span></div><div class="pimg"><span class="serif">The Black Drop</span><span class="pl">live 1 Dec<i class="ringx" style="--t:7.45"></i></span></div><div class="pcap">Code TARA10</div></div>
+          </div>
+        </div>
+
+        <div class="verdict a rise" style="--t:7.9"><span>Nothing connects the delay to the drop.</span></div>
+      </div>
+    </div>
+    <figcaption><span>The delay lands in one chat and sinks under five newer ones. The tracker still says 20 Nov, the shop is still scheduled for 1 Dec, and three posts still promise it.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <p class="reveal">Nobody here is careless. The message arrives in a group with a dozen others. The tracker was last updated a week ago. The shop has never heard of a factory. The creator posts were agreed in a different chat, with a different person. To see that a fabric delay breaks three creator posts, someone has to hold all four tools in their head at once, and in a small brand that someone is the founder, late at night.</p>
+    <p class="reveal">This is how small D2C brands lose launches and money. A drop slips and the creators who announced it look wrong in front of their followers. A size sells out in four days and the reorder never goes out, because sales live in one tool and factory lead times in another. A supplier was chosen for a reason that nobody wrote down, and three weeks later nobody can say why.</p>
+    <p class="pull reveal">Every tool sees one slice.</p>
+    <p class="reveal">Shopify sees orders. WhatsApp holds the supplier talk. A spreadsheet holds the production plan. The problems that hurt most cross from making to selling, so they stay invisible until a customer or a creator notices.</p>
+  </div>
+</section>
+
+<!-- ===================================================== 2. THE IDEA -->
+<section class="ch" id="idea">
+  <div class="col">
+    <div class="kicker reveal"><span class="sq"></span>The idea</div>
+    <h2 class="reveal">One live plan per drop, <em>as a graph</em></h2>
+    <p class="reveal">Weft keeps one plan for each drop, and the plan is a graph in FalkorDB. Suppliers, purchase orders, SKUs, styles, the drop and the creator posts that promote it are connected nodes, and every fact links back to where it came from. When something changes anywhere, the graph already knows what sits downstream.</p>
+  </div>
+
+  <figure class="scene" id="s-graph">
+    <div class="stage fix" role="img" aria-label="The scattered pieces fly into place and become a connected graph: Sri Lakshmi Knits, PO-014, three leggings SKUs, the Core Leggings style, the Black Drop, and three creator posts promoting it. Below, the three teammates Weft, Shuttle and Pattern.">
+      <div class="inner ui gs d-abs">
+        <div class="frag" style="--x0:520;--y0:440;--r:-4;--x1:262;--y1:82;--t:.1;--f:1.68"><div class="fi"><div class="fb chat"><small>Sri Lakshmi · PO-014</small>Sir, fabric delayed. Coming 28th.</div></div></div>
+        <div class="frag" style="--x0:150;--y0:425;--r:5;--x1:100;--y1:200;--t:.16;--f:1.5"><div class="fi"><div class="fb row"><span class="cav" style="width:26px;height:26px;font-size:10px;background:var(--vendor-soft);color:var(--fathom)">SL</span><span><b>Sri Lakshmi Knits</b><br><span class="muted" style="font-size:10.5px">Murugan · Tiruppur</span></span></div></div></div>
+        <div class="frag" style="--x0:320;--y0:322;--r:-3;--x1:262;--y1:200;--t:.22;--f:1.59"><div class="fi"><div class="fb row5"><span>PO-014</span><span>Core Leggings · Black</span><span>600</span><span>₹420</span><span style="border:0">20 Nov</span></div></div></div>
+        <div class="frag" style="--x0:735;--y0:395;--r:4;--x1:560;--y1:200;--t:.28;--f:1.77"><div class="fi"><div class="fb row"><i style="width:28px;height:28px;border-radius:7px;background:#1F1F1E"></i><span><b>Core Leggings</b><br><span class="muted" style="font-size:10.5px">Black · S M L</span></span></div></div></div>
+        <div class="frag" style="--x0:470;--y0:92;--r:-6;--x1:706;--y1:200;--t:.34;--f:1.86"><div class="fi"><div class="fb"><span class="serif" style="font-size:18px">Black Drop</span> <span class="badge" style="background:var(--raised)">Scheduled · 1 Dec</span></div></div></div>
+        <div class="frag" style="--x0:850;--y0:440;--r:6;--x1:876;--y1:128;--t:.4;--f:1.95"><div class="fi"><div class="fb dark"><b>@runwithria</b> · live 1 Dec</div></div></div>
+        <div class="frag" style="--x0:655;--y0:84;--r:3;--x1:876;--y1:200;--t:.46;--f:2.04"><div class="fi"><div class="fb dark"><b>@liftwithdev</b> · live 1 Dec</div></div></div>
+        <div class="frag" style="--x0:120;--y0:96;--r:-3;--x1:876;--y1:272;--t:.52;--f:2.13"><div class="fi"><div class="fb dark"><b>@yogawithtara</b> · live 1 Dec</div></div></div>
+        <div class="gs-head a fade" style="--t:4.7"><div class="label">The plan, as a graph</div><div class="serif">Everything the drop <em>depends on</em>, connected</div></div>
+        <div data-graph="snap"></div>
+        <div class="mates">
+          <div class="mate a rise" style="--t:5.25"><span class="avatar av av-weft">W</span><div><b>Weft</b> <span class="role">· Chief of staff</span><p>Answers anything from the graph, routes questions, writes the morning brief.</p></div></div>
+          <div class="mate a rise" style="--t:5.4"><span class="avatar av av-shuttle">S</span><div><b>Shuttle</b> <span class="role">· Production lead</span><p>Sends supplier check-ins, chases what has gone quiet, works out what a delay breaks.</p></div></div>
+          <div class="mate a rise" style="--t:5.55"><span class="avatar av av-pattern">P</span><div><b>Pattern</b> <span class="role">· Sales analyst</span><p>Reads the shop, spots sell-outs, drafts restocks, tracks which creators sell.</p></div></div>
+        </div>
+      </div>
+    </div>
+    <figcaption><span>The same pieces, connected: supplier, PO, SKUs, style, drop, and the creator posts that promise its date. Three teammates work on that one graph.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <p class="reveal">The plan is the source of truth, not the chat. It stays current four ways: the team edits it in the app, suppliers answer check-ins, chat messages become linked evidence, and a due date that passes with no news shows up as <i>gone quiet</i>.</p>
+    <p class="reveal">Three AI teammates work on it with us. <b>Weft</b> is the chief of staff, <b>Shuttle</b> runs production and <b>Pattern</b> reads the sales. They don't keep their own notes. They share the graph as their memory, and every answer they give comes with the path behind it.</p>
+  </div>
+</section>
+
+<!-- ===================================================== 3. ACT 1 -->
+<section class="ch" id="act1">
+  <div class="col">
+    <div class="kicker reveal"><span class="sq"></span>The journey · Act 1</div>
+    <h2 class="reveal">Countdown, <em>18 November</em></h2>
+    <p class="reveal">Here is the same morning with Weft. Each slice below is a recreation of the real screen.</p>
+
+    <div class="slice">
+      <div class="sh reveal"><span class="n">01</span><h3>Today</h3></div>
+      <p class="reveal">Kshitij opens Weft. The home screen is called Today, and it answers the first question of the morning: how far away is the drop, and is it ready? Thirteen days. All 5 factory orders on time, samples approved, creators booked. One supplier has gone quiet on a lab dip, and PageRank over the supply graph flags Sri Lakshmi Knits as the single point of failure: 9 of the 15 SKUs depend on it.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-today">
+    <div class="stage fix" role="img" aria-label="Weft's Today screen: the teal hero counts down to 13 days until the Black Drop, with drop readiness rows, a follow-up call about a quiet lab dip, and a PageRank panel showing Sri Lakshmi Knits as the single point of failure.">
+      <div class="inner ui app">
+        <div class="topb a fade" style="--t:.1">
+          <div class="askbar"><span class="avatar av-weft" style="width:22px;height:22px;font-size:14px">W</span>Ask Weft anything, e.g. “why is size M selling so fast?”<span class="k">⌘J</span></div>
+          <div class="tabs"><span class="on">Countdown · 18 Nov</span><span>Live · 10 Dec</span></div>
+        </div>
+        <div class="a rise" style="--t:.3"><h4 class="gh1">Good morning, Kshitij.</h4><p class="lede">Wednesday, 18 Nov · Production is moving. <strong>One call needs you.</strong></p></div>
+        <section class="hero a rise" style="--t:.55">
+          <div class="hl">
+            <span class="pill ok" style="align-self:flex-start;background:var(--ok-soft)"><span class="dot"></span>Countdown · on track</span>
+            <div class="nrow"><span class="numeral count cd13"></span><span class="nlab">days until<br>the <em>Black Drop</em></span></div>
+            <div class="sub mono a fade" style="--t:1.5;font-size:12.5px">Goes live 1 Dec · 3 styles · 15 SKUs · 2,100 units</div>
+          </div>
+          <div class="hr">
+            <div class="sub a fade" style="--t:1.5">Drop readiness</div>
+            <div class="kv a rise" style="--t:1.65"><span>Factory orders on time</span><span class="mono">5 of 5</span></div>
+            <div class="kv a rise" style="--t:1.8"><span>Samples approved</span><span class="mono">3 of 3 styles</span></div>
+            <div class="kv a rise" style="--t:1.95"><span>Creators booked</span><span class="mono">3 · post 25 Nov</span></div>
+            <div class="kv a rise" style="--t:2.1"><span>Suppliers gone quiet</span><span class="mono">1</span></div>
+            <div class="row a fade" style="--t:2.3;margin-top:4px"><span class="btn cream sm">Open production</span><span class="btn sm" style="background:rgba(255,255,235,.14)">Try a scenario</span></div>
+          </div>
+        </section>
+        <div class="grid2">
+          <section class="card a rise" style="--t:2.5">
+            <div class="card-head"><h5>Your call</h5><span class="muted" style="font-size:13px">1</span></div>
+            <div class="call">
+              <div class="call-who"><span class="avatar av-shuttle">S</span>Shuttle: Drafted a follow-up to Ananya</div>
+              <div class="call-body">To Ananya Fabrics: the olive lab dip was due 15 Nov. Any update?</div>
+            </div>
+          </section>
+          <section class="card a rise" style="--t:2.65">
+            <div class="card-head"><h5>Single points of failure</h5><span class="muted" style="font-size:12px">PageRank on the plan</span></div>
+            <div class="kv" style="align-items:center"><span><b style="font-weight:600">Sri Lakshmi Knits</b><br><span class="muted" style="font-size:12px">9 SKUs depend on it</span></span><span class="bar"><i style="--t:2.9;width:100%;background:var(--flare-ink)"></i></span></div>
+            <div class="kv" style="align-items:center"><span><b style="font-weight:600">Kavya Garments</b><br><span class="muted" style="font-size:12px">6 SKUs depend on it</span></span><span class="bar"><i style="--t:3;width:62%;background:var(--ink)"></i></span></div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <figcaption><span>Today, Countdown phase: the days left, what is ready, and what needs a decision.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="slice">
+      <div class="sh reveal"><span class="n">02</span><h3>Shuttle asks <em>before</em> it is due</h3></div>
+      <p class="reveal">Shuttle, the production teammate, doesn't wait for news. The fabric for PO-014 is due today, so it has already sent Murugan a check-in: one question, answered in one tap. Murugan sees only his own POs and this chat.</p>
+      <p class="reveal">He picks <i>Delayed</i> and keeps the date, 28 November. The answer is written straight onto the check-in node attached to PO-014 in the graph.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-checkin">
+    <div class="stage fix" role="img" aria-label="The supplier view for Sri Lakshmi Knits. Shuttle's check-in asks 'Is the fabric in for PO-014?'. A cursor taps 'Delayed, pick a date', keeps 28/11/2026 and taps Send. The answer appears in the supplier chat.">
+      <div class="inner ui ci d-abs">
+        <div class="ci-h a fade" style="--t:.1">
+          <div><h6><i></i>Sri Lakshmi Knits</h6><p>Supplier chat · Factory, Tiruppur · 14-day lead time · Murugan is a guest and sees only this chat</p></div>
+          <span class="chip vendor">Supplier view</span>
+        </div>
+        <div class="left">
+          <span class="label a fade" style="--t:.3">Check-ins from Shuttle</span>
+          <div class="cicard a rise" style="--t:.35">
+            <div class="row" style="justify-content:space-between"><span class="row" style="gap:6px;font-size:13px;font-weight:600;color:var(--fathom)"><span class="avatar av-shuttle">S</span>Shuttle · check-in</span><span class="mono muted" style="font-size:12px">PO-014 · due 18 Nov</span></div>
+            <div class="q">Is the fabric in for PO-014?</div>
+            <div class="swap" style="display:grid">
+              <div style="display:flex;flex-direction:column;gap:10px" class="a out" data-x style="--t:3.6"><div class="row"><span class="btn fathom lg">Yes, arrived</span><span class="tap" style="--t:1.95"><span class="btn ghost lg">Delayed → pick a date</span><i class="cursor"></i></span></div>
+                <div class="pick"><span class="muted" style="font-size:13px">New fabric date</span><span class="dinput">28/11/2026<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/></svg></span><span class="tap" style="--t:3.3"><span class="btn lg">Send</span><i class="cursor"></i></span></div>
+              </div>
+              <div class="muted a fade" style="--t:3.7;font-size:14px;align-self:start">Answered. Thanks, the team has it.</div>
+            </div>
+          </div>
+          <span class="label a fade" style="--t:.5;margin-top:4px">Purchase orders</span>
+          <div class="row a rise" style="--t:.55;flex-wrap:nowrap;gap:10px">
+            <div class="minipo" style="flex:1"><div class="row" style="justify-content:space-between"><span class="mono" style="font-weight:500">PO-014</span><span class="badge ok">accepted</span></div><b style="font-weight:600">Core Leggings · Black · 600 pcs</b><span class="mono muted">₹420/pc · due 20 Nov</span></div>
+            <div class="minipo" style="flex:1"><div class="row" style="justify-content:space-between"><span class="mono" style="font-weight:500">PO-015</span><span class="badge ok">accepted</span></div><b style="font-weight:600">Sculpt Sports Bra · Black · 300 pcs</b><span class="mono muted">₹380/pc · due 24 Nov</span></div>
+          </div>
+        </div>
+        <div class="right">
+          <span class="label a fade" style="--t:.4">Chat with the brand team</span>
+          <div class="chat a rise" style="--t:.45">
+            <div class="msg me"><small>Rohan · 4 Nov</small>Murugan, PO-014 for 600 black leggings is confirmed: S/M/L 150/300/150 at ₹420.</div>
+            <div class="msg sup"><small>Murugan · 4 Nov</small>Received sir. Dispatch by 20 Nov.</div>
+            <div class="msg sup"><small>Murugan · 12 Nov</small>Sports bra QC started today.</div>
+            <div class="msg sup a rise" style="--t:3.95"><small>Murugan · 18 Nov, 10:42</small>Is the fabric in for PO-014? Delayed, new date 2026-11-28.<div class="ansc a pop" style="--t:4.3">Check-in answered · Delayed → 28 Nov</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figcaption><span>What Murugan sees at Sri Lakshmi: his POs, Shuttle's check-in, and the chat. One tap, one date.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="slice">
+      <div class="sh reveal"><span class="n">03</span><h3>Your call, with the <em>impact</em> attached</h3></div>
+      <p class="reveal">Shuttle doesn't change the plan on its own. It walks the graph from PO-014 through its SKUs and style to the Black Drop, then back out to every creator post that promotes it, and turns the result into a call for Kshitij.</p>
+      <p class="reveal">Fabric on 28 November means the leggings land around 5 December, four days after the drop, and the three posts that promise 1 December break. That sentence is one Cypher query, not someone's memory.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-impact">
+    <div class="stage fix" role="img" aria-label="A 'Your call' card from Shuttle appears with a dashed amber border: PO-014 lands around 5 Dec, 4 days after the Black Drop, and breaks 3 creator posts. Beside it, a graph lights up in coral from Sri Lakshmi Knits through PO-014, its three SKUs, Core Leggings and the Black Drop, out to the three creator posts.">
+      <div class="inner ui im d-abs">
+        <div class="left">
+          <section class="hero strip a rise" style="--t:.05">
+            <span class="swap" style="align-self:flex-start"><span class="pill ok a out" style="--t:.95"><span class="dot"></span>Countdown · on track</span><span class="pill risk a fade" style="--t:.95"><span class="dot"></span>Countdown · your call pending</span></span>
+            <div class="nrow"><span class="numeral">13</span><span class="nlab">days until the <em>Black Drop</em></span></div>
+          </section>
+          <section class="card a rise" style="--t:.2">
+            <div class="card-head"><h5>Your call</h5><span class="muted swap" style="font-size:13px"><span class="a out" style="--t:.9">1</span><span class="a fade" style="--t:.9">2</span></span></div>
+            <div class="newcall">
+              <div class="call">
+                <div class="call-who"><span class="avatar av-shuttle">S</span>Shuttle: Supplier says fabric is delayed</div>
+                <div class="call-body">Sri Lakshmi Knits says fabric for PO-014 arrives 28 Nov. If accepted, PO-014 lands <mark style="--t:3.85">~5 Dec, 4 days after the Black Drop (1 Dec)</mark>, and <mark style="--t:4.45">breaks 3 creator posts</mark> on 25 Nov (@runwithria, @liftwithdev, @yogawithtara).</div>
+                <div class="row"><span class="btn sm">Accept new date</span><span class="tap" style="--t:5.9"><span class="btn dawn sm">Scenario</span><i class="cursor"></i></span><span class="btn quiet sm">Ignore</span><span class="btn quiet sm">See why</span></div>
+              </div>
+            </div>
+            <div class="call" style="opacity:.6">
+              <div class="call-who"><span class="avatar av-shuttle">S</span>Shuttle: Drafted a follow-up to Ananya</div>
+              <div class="call-body">To Ananya Fabrics: the olive lab dip was due 15 Nov. Any update?</div>
+            </div>
+          </section>
+        </div>
+        <section class="gpan a rise" style="--t:.3">
+          <div class="gph"><span class="label">Brand map · what PO-014 touches</span><span class="chip msg mono" style="font-size:11px">impactOf('PO-014')</span></div>
+          <div data-graph="impact"></div>
+        </section>
+      </div>
+    </div>
+    <figcaption><span>One traversal: PO-014 → SKUs → Core Leggings → Black Drop ← creator posts. The call waits for an Owner or Manager.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="slice">
+      <div class="sh reveal"><span class="n">04</span><h3>Try it in a <em>scenario</em> first</h3></div>
+      <p class="reveal">Kshitij could just accept the new date. Instead he opens a scenario: what if PO-014 moves to Kavya Garments? Weft makes a full private copy of the plan with <code>GRAPH.COPY</code>, moves the PO only inside the copy, and re-dates it from Kavya's 10-day lead time.</p>
+      <p class="reveal">Then it asks both graphs the same question. Reality: 5 December, the drop is late, 3 posts broken. The scenario: 28 November, on time, every post kept, for ₹12,000 more. He applies it. The scenario graph is copied over the plan, and the decision is recorded with who, when and which scenario.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-scenario">
+    <div class="stage fix" role="img" aria-label="The plan graph is copied into a lilac scenario graph with GRAPH.COPY. In the copy, PO-014's supplier edge moves from Sri Lakshmi Knits to Kavya Garments and turns green. A comparison table fills in: reality 5 Dec, 4 days late, late drop, 3 broken posts, ₹2,52,000; scenario 28 Nov, 3 days spare, on time, all kept, ₹2,64,000, plus ₹12,000. Apply to plan slides the copy over reality.">
+      <div class="inner ui sc d-abs">
+        <div class="sch a fade" style="--t:.05">
+          <div class="muted" style="font-size:12.5px">Scenarios</div>
+          <h4 class="h1x">What if PO-014 moves to <em>Kavya Garments</em>?</h4>
+          <p class="lede">A private copy of your plan. Nothing here reaches Production, your suppliers or Today until you apply it.</p>
+        </div>
+        <div class="acts">
+          <span class="tap a fade" style="--t:6.95"><span class="btn fathom">Apply to plan</span><i class="cursor"></i></span>
+          <span class="btn ghost a fade" style="--t:6.3">Discard</span>
+        </div>
+        <div class="confirm inout" style="--t:7.15;--t2:8.1">
+          <div><b>Apply to plan?</b> The scenario graph replaces the plan, the delay call closes, and the decision is recorded with who and when.</div>
+          <div class="row"><span class="tap" style="--t:7.85"><span class="btn fathom sm">Yes, apply to plan</span><i class="cursor"></i></span><span class="btn ghost sm">Cancel</span></div>
+        </div>
+        <div class="chips row">
+          <span class="muted a fade" style="--t:3.45;font-size:12.5px">Changes in this scenario</span>
+          <span class="chip po a pop" style="--t:3.55">PO-014: Sri Lakshmi Knits → Kavya Garments</span>
+          <span class="chip vendor a pop" style="--t:3.65">lands 28 Nov</span>
+          <span class="chip po a pop" style="--t:3.75">+₹20 per piece</span>
+          <span class="chip msg mono a pop" style="--t:3.85">graph: weft_scnmh9q2k</span>
+        </div>
+        <div class="panels">
+          <div class="gp real a rise" style="--t:.2"><div class="gph"><span>Reality <span class="muted" style="font-weight:400">with the supplier's delay</span></span><span class="chip msg mono" style="font-size:10.5px">graph: weft</span></div><div data-graph="scnReal"></div></div>
+          <div class="mv">
+            <div class="gp scn"><div class="gph"><span class="swap"><span class="a out" style="--t:8.75;color:var(--dawn-ink)">This scenario</span><span class="a fade" style="--t:8.8">The plan <span class="muted" style="font-weight:400">· scenario applied</span></span></span><span class="swap"><span class="chip dawn mono a out" style="--t:8.75;font-size:10.5px">GRAPH.COPY → weft_scnmh9q2k</span><span class="chip msg mono a fade" style="--t:8.8;font-size:10.5px">graph: weft</span></span></div><div data-graph="scnCopy"></div></div>
+          </div>
+          <span class="copychip inout" style="--t:1.2;--t2:2.7">GRAPH.COPY weft → weft_scnmh9q2k</span>
+          <div class="applied a rise" style="--t:9.05">
+            <div><b>Applied to plan.</b> PO-014 is now with Kavya Garments, due 28 Nov. The fabric-delay call is closed and the decision is recorded.</div>
+            <div class="row"><span class="chip decision">Decision · Kshitij · 18 Nov</span><span class="chip msg mono" style="font-size:11px">weft_scnmh9q2k deleted</span></div>
+          </div>
+        </div>
+        <div class="tblw">
+          <table class="cmp">
+            <thead class="a fade" style="--t:4.05"><tr><th style="width:34%"></th><th class="r" style="background:var(--surface-2)">Reality <span class="muted" style="font-weight:400;font-size:12px">with the supplier's delay</span></th><th style="background:var(--dawn-soft);color:var(--dawn-ink)">This scenario</th></tr></thead>
+            <tbody>
+              <tr><th class="a fade" style="--t:4.3">PO-014 arrives</th><td class="r a fade" style="--t:4.42"><span class="mono">5 Dec</span> <span class="badge late">4 days late</span></td><td class="s a fade" style="--t:4.54"><span class="mono">28 Nov</span> <span class="badge ok">3 days spare</span></td></tr>
+              <tr><th class="a fade" style="--t:4.75">Black Drop, 1 Dec</th><td class="r a fade" style="--t:4.87"><span class="badge late">Late</span></td><td class="s a fade" style="--t:4.99"><span class="badge ok">On time</span></td></tr>
+              <tr><th class="a fade" style="--t:5.2">Creator posts announcing “live 1 Dec”</th><td class="r a fade" style="--t:5.32">3 broken</td><td class="s a fade" style="--t:5.44">All kept</td></tr>
+              <tr><th class="a fade" style="--t:5.65">PO-014 cost</th><td class="r mono a fade" style="--t:5.77">₹2,52,000</td><td class="s mono a fade" style="--t:5.89">₹2,64,000 <span style="font-family:var(--sans);color:var(--glow-ink);font-weight:600;font-size:12.5px">+₹12,000</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <figcaption><span>Copy the graph, change the copy, ask both the same question, then apply. The copy is a real FalkorDB graph, not a diff in memory.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="slice">
+      <div class="sh reveal"><span class="n">05</span><h3>Ask why, and <em>see</em> why</h3></div>
+      <p class="reveal">A week from now someone will ask why the leggings moved, or why we picked Sri Lakshmi in the first place. <b>⌘J</b> opens Ask. Weft answers from the graph and cites the nodes it used. <i>See why</i> lists every Cypher query it ran and the messages the answer traces back to.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-ask">
+    <div class="stage fix" role="img" aria-label="Pressing Command J opens the Ask Weft panel. The question 'Why did we pick Sri Lakshmi Knits?' is typed. Weft answers with the decision of 14 Sep and Rohan's comparison, citing node ids. See why expands to show the two Cypher queries it ran.">
+      <div class="inner ui ak d-abs">
+        <div class="ghost-app a fade" style="--t:0">
+          <div class="askbar" style="flex:none">Ask Weft anything…<span class="k">⌘J</span></div>
+          <h4 class="gh1" style="margin-top:18px;font-size:28px">Good morning, Kshitij.</h4>
+          <div class="hero" style="margin-top:16px;padding:20px"><div class="nrow"><span class="numeral" style="font-size:80px">13</span><span class="nlab" style="font-size:22px">days until<br>the <em>Black Drop</em></span></div></div>
+          <div class="card" style="margin-top:14px"><h5>Your call</h5><div class="call" style="border-style:solid;border-color:var(--line-2);background:var(--surface-2)"><div class="call-body">Moved PO-014 to Kavya Garments.</div></div></div>
+        </div>
+        <div class="keys inout" style="--t:.2;--t2:1.25"><span class="kc">⌘</span><span class="kc">J</span></div>
+        <aside class="askp a slide" style="--t:.85">
+          <div class="ph"><span class="avatar av-weft" style="width:26px;height:26px;font-size:16px">W</span><b>Ask Weft</b><span class="muted">routes to Shuttle or Pattern · answers from the graph</span><span class="esc">Esc</span></div>
+          <div class="pbody">
+            <div class="scroll">
+              <div class="sugg a out" style="--t:3">
+                <span class="label">Try</span>
+                <span class="btn ghost">How's the Black Drop doing, and what should I do?</span>
+                <span class="btn ghost">Which creator actually drives repeat buyers?</span>
+                <span class="btn ghost">What breaks if PO-014 slips a week?</span>
+              </div>
+              <div class="ubub a rise" style="--t:3.05;margin-top:-176px">Why did we pick Sri Lakshmi Knits?</div>
+              <div class="muted inout" style="--t:3.25;--t2:4.05;font-size:13.5px">Reading the graph…</div>
+              <div class="ans a fade" style="--t:4.05;margin-top:-30px">
+                <span class="avatar av-weft">W</span>
+                <div class="bd">
+                  <div style="font-size:12.5px"><b>Weft</b> <span class="muted">Chief of staff</span></div>
+                  <div class="bubble stream" data-t="4.2" data-step=".045">We chose <strong>Sri Lakshmi Knits</strong> for the leggings and the sports bra on 14 Sep <span class="chip po cite">d-choose-sri</span>. Rohan's comparison: ₹40 cheaper per piece than Tiruppur Tex, and cleaner stitching on the fit samples <span class="chip po cite">m-sri-compare</span>. Kshitij signed it off two days later: “Go with Sri Lakshmi for the leggings and the bra.” <span class="chip po cite">m-sri-go</span></div>
+                  <div class="row a fade" style="--t:7"><span class="tap" style="--t:7.7"><span class="btn dawn sm">See why · 2 queries</span><i class="cursor"></i></span><span class="btn ghost sm">Show on Brand map</span></div>
+                  <div class="why">
+                    <div class="row a fade" style="--t:7.95"><span class="chip po">d-choose-sri</span><span class="chip po">m-sri-compare</span><span class="chip po">m-sri-go</span></div>
+                    <div class="q a fade" style="--t:8.1">1. Find the decision about Sri Lakshmi and who made it · 1 row</div>
+                    <pre class="query a rise" style="--t:8.2">MATCH (p:Person)-[:DECIDED]-&gt;(d:Decision)-[:ABOUT]-&gt;(s:Supplier {id:'sri'})
+RETURN d.id, d.text, d.at, p.name</pre>
+                    <div class="q a fade" style="--t:8.45">2. Read the messages the decision came from · 2 rows</div>
+                    <pre class="query a rise" style="--t:8.55">MATCH (:Decision {id:'d-choose-sri'})-[:SOURCED_FROM]-&gt;(m:Message)
+RETURN m.id, m.author, m.channel, m.text, m.at</pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pform"><div class="input"><span class="swap" style="display:inline-grid;width:100%"><span class="ph-swap" style="animation:out .15s both,fade .3s both;animation-delay:1.35s,3s">Ask anything about your drop…</span><span class="a out" style="--t:3;animation-duration:.15s"><span class="typed" data-dur="1.4" style="--t:1.4">Why did we pick Sri Lakshmi Knits?</span><i class="caret" style="--t:1.4;--t2:3"></i></span></span></div><span class="btn lg">Ask</span></div>
+        </aside>
+      </div>
+    </div>
+    <figcaption><span>Ask answers by querying the graph, read-only. See why shows the queries and the source messages, so an answer can be checked, not just trusted.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+</section>
+
+<!-- ===================================================== 4. ACT 2 -->
+<section class="ch" id="act2">
+  <div class="col">
+    <div class="kicker reveal"><span class="sq"></span>The journey · Act 2</div>
+    <h2 class="reveal">Live, <em>day 9</em></h2>
+
+    <div class="slice" style="padding-top:8px">
+      <div class="sh reveal"><span class="n">06</span><h3>The drop, by the <em>size</em></h3></div>
+      <p class="reveal">Fast-forward to 10 December, nine days after launch. Today flips from a countdown to a scoreboard: 62% of the Black Drop sold, ₹27.4L in revenue, 958 orders. The heatmap shows sell-through for all 15 SKUs by size. Black leggings in M sold out on day 4. The olive tank is crawling.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-live">
+    <div class="stage fix" role="img" aria-label="The demo clock switches from Countdown to Live, 10 Dec. The hero changes to 62% of the Black Drop sold, ₹27.4L revenue, 958 orders, 1,307 of 2,100 units, 1.4% returns. A 15-cell heatmap fills in by size: black leggings M is sold out, the olive tank row stays pale at 25 to 30%.">
+      <div class="inner ui app lv">
+        <div class="topb a fade" style="--t:.05">
+          <div class="askbar"><span class="avatar av-weft" style="width:22px;height:22px;font-size:14px">W</span>Ask Weft anything, e.g. “why is size M selling so fast?”<span class="k">⌘J</span></div>
+          <div class="tabs"><i class="tabhl"></i><span class="on">Countdown · 18 Nov</span><span class="tap" style="--t:1;display:inline-flex;padding:0;height:34px"><span style="padding:0 13px;display:inline-flex;align-items:center">Live · 10 Dec</span><i class="cursor"></i></span></div>
+        </div>
+        <div class="a rise" style="--t:.15"><h4 class="gh1">Good morning, Kshitij.</h4>
+          <p class="lede swap" style="display:grid"><span class="a out" style="--t:1.2">Wednesday, 18 Nov · Production is moving. <strong>One call needs you.</strong></span><span class="a fade" style="--t:1.35">Thursday, 10 Dec · The Black Drop is selling faster than planned. <strong>2 calls need you.</strong></span></p></div>
+        <section class="hero a rise" style="--t:.3">
+          <div class="layers">
+            <div class="cdl a out" style="--t:1.25">
+              <div class="hl" style="display:flex;flex-direction:column;gap:12px">
+                <span class="pill ok" style="align-self:flex-start"><span class="dot"></span>Countdown · on track</span>
+                <div class="nrow"><span class="numeral">13</span><span class="nlab">days until<br>the <em>Black Drop</em></span></div>
+                <div class="sub mono" style="font-size:12.5px">Goes live 1 Dec · 3 styles · 15 SKUs · 2,100 units</div>
+              </div>
+            </div>
+            <div class="lvl">
+              <div style="display:flex;flex-direction:column;gap:12px;flex:1 1 330px">
+                <span class="pill ok a pop" style="--t:1.5;align-self:flex-start"><span class="dot"></span>Live · day 9</span>
+                <div class="nrow a fade" style="--t:1.6"><span class="numeral"><span class="count p62"></span>%</span><span class="nlab">of the<br><em>Black Drop</em> sold</span></div>
+                <div class="stats">
+                  <div class="a rise" style="--t:2.05"><div class="mono">₹27.4L</div><div class="sub">revenue</div></div>
+                  <div class="a rise" style="--t:2.15"><div class="mono">958</div><div class="sub">orders</div></div>
+                  <div class="a rise" style="--t:2.25"><div class="mono">1,307 / 2,100</div><div class="sub">units sold</div></div>
+                  <div class="a rise" style="--t:2.35"><div class="mono">1.4%</div><div class="sub">returns</div></div>
+                </div>
+              </div>
+              <div style="flex:1 1 360px;display:flex;flex-direction:column;gap:8px">
+                <div class="sub a fade" style="--t:2.2;display:flex;justify-content:space-between"><span>Sold through, by size</span><span>15 SKUs</span></div>
+                <div class="heat">
+                  <span></span><span class="sub a fade" style="--t:2.25;text-align:center">S</span><span class="sub a fade" style="--t:2.25;text-align:center">M</span><span class="sub a fade" style="--t:2.25;text-align:center">L</span>
+                  <span class="rl" style="--i:0">Leggings · Black</span><span class="cell" style="--i:0;background:#CFE6E1;color:#034F46;font-weight:700">87%</span><span class="cell" style="--i:1;background:#FFFFEB;color:#7F1C34;font-weight:700">Sold out<i class="soring"></i></span><span class="cell" style="--i:2;background:#CFE6E1;color:#034F46;font-weight:700">80%</span>
+                  <span class="rl" style="--i:1">Leggings · Olive</span><span class="cell" style="--i:3;background:rgba(255,255,235,.24)">55%</span><span class="cell" style="--i:4;background:rgba(255,255,235,.45);color:#02362F">62%</span><span class="cell" style="--i:5;background:rgba(255,255,235,.24)">50%</span>
+                  <span class="rl" style="--i:2">Bra · Black</span><span class="cell" style="--i:6;background:rgba(255,255,235,.45);color:#02362F">69%</span><span class="cell" style="--i:7;background:#CFE6E1;color:#034F46;font-weight:700">76%</span><span class="cell" style="--i:8;background:rgba(255,255,235,.45);color:#02362F">64%</span>
+                  <span class="rl" style="--i:3">Tank · Black</span><span class="cell" style="--i:9;background:rgba(255,255,235,.24)">45%</span><span class="cell" style="--i:10;background:rgba(255,255,235,.24)">55%</span><span class="cell" style="--i:11;background:rgba(255,255,235,.24)">48%</span>
+                  <span class="rl olive" style="--i:4">Tank · Olive</span><span class="cell" style="--i:12;background:rgba(255,255,235,.1)">25%</span><span class="cell" style="--i:13;background:rgba(255,255,235,.1)">30%</span><span class="cell" style="--i:14;background:rgba(255,255,235,.1)">26%</span>
+                </div>
+                <div class="sub a fade" style="--t:4">Olive tank is slow and 9 came back “too short”. Ask Pattern why.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="grid3">
+          <section class="card a rise" style="--t:4.2"><div class="card-head"><h5>Your call</h5><span class="muted" style="font-size:13px">2</span></div><div class="call"><div class="call-who"><span class="avatar av-pattern">P</span>Pattern: Drafted a restock</div><div class="call-body">Black leggings M sold out on day 4.</div></div></section>
+          <section class="card a rise" style="--t:4.3"><div class="card-head"><h5>Restock now</h5><span class="muted" style="font-size:12px">by Pattern</span></div><div class="kv"><span><b style="font-weight:600">Leggings · Black · M</b><br><span style="font-size:12px;font-weight:600;color:var(--pulse)">Sold out</span></span><span class="mono" style="font-size:13px">+340</span></div></section>
+          <section class="card a rise" style="--t:4.4"><div class="card-head"><h5>Top creators</h5><span class="muted" style="font-size:12px">orders on their code</span></div><div class="kv"><span><b style="font-weight:600">@runwithria</b><br><span class="muted" style="font-size:12px">RIA15 · 38% buy again</span></span><span class="mono" style="font-size:13px">41%</span></div></section>
+        </div>
+      </div>
+    </div>
+    <figcaption><span>The same graph, nine days later. Sell-through per SKU is read from the SKU nodes and aggregated in Cypher.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="slice">
+      <div class="sh reveal"><span class="n">07</span><h3>Pattern connects selling back to <em>making</em></h3></div>
+      <p class="reveal">Pattern, the sales teammate, answers “How is the Black Drop doing?” numbers first: the sell-out, S and L running low, and the olive tank. Nine olive tanks came back “too short”, and Pattern follows the graph from the SKU to its style to the fit sample, where someone wrote “body length −2 cm”.</p>
+      <p class="reveal">Then the restock it drafted: 340 black leggings in M from Kavya Garments, who made this batch after the scenario. A manager approves it, and it becomes PO-022, landing 20 December.</p>
+    </div>
+  </div>
+
+  <figure class="scene" id="s-pattern">
+    <div class="stage fix" role="img" aria-label="Pattern answers 'How is the Black Drop doing, and what should I do next?' with the sell-out, low S and L stock, and the olive tank returns traced to the fit sample note 'body length −2 cm'. On the right, Approve PO turns Pattern's restock call into PO-022 for 340 units from Kavya Garments, landing 20 Dec.">
+      <div class="inner ui pt d-abs">
+        <aside class="askp a rise" style="--t:.05">
+          <div class="ph"><span class="avatar av-weft" style="width:26px;height:26px;font-size:16px">W</span><b>Ask Weft</b><span class="muted">routes to Shuttle or Pattern · answers from the graph</span><span class="esc">Esc</span></div>
+          <div class="pbody">
+            <div class="scroll">
+              <div class="ubub a rise" style="--t:2.3">How is the Black Drop doing, and what should I do next?</div>
+              <div class="muted inout" style="--t:2.5;--t2:3.15;font-size:13.5px">Reading the graph…</div>
+              <div class="ans a fade" style="--t:3.15;margin-top:-30px">
+                <span class="avatar av-pattern">P</span>
+                <div class="bd">
+                  <div style="font-size:12.5px"><b>Pattern</b> <span class="muted">Sales analyst</span></div>
+                  <div class="bubble stream" data-t="3.3" data-step=".034"><strong>62% sold</strong> in 9 days: 1,307 of 2,100 units, ₹27.4L <span class="chip po cite">black-drop</span>. Black leggings M sold out on day 4 <span class="chip po cite">LEG-BLK-M</span>, and S and L have 1.4 and 2.3 days of stock left <span class="chip po cite">LEG-BLK-S</span> <span class="chip po cite">LEG-BLK-L</span>. The olive tank is the slow one at 25–30%, and 9 came back “too short” <span class="chip po cite">TNK-OLV-M</span>. That traces to its fit sample: “body length −2 cm to match the bra hem” <span class="chip po cite">s-tank-fit</span>. Next: approve the restock I drafted, 340 from Kavya Garments.</div>
+                  <div class="pathstrip">
+                    <span class="chip msg mono a pop" style="--t:6.5;font-size:11px">TNK-OLV-M</span><span class="arr a fade" style="--t:6.6">—OF_STYLE→</span>
+                    <span class="chip style a pop" style="--t:6.7">Everyday Tank</span><span class="arr a fade" style="--t:6.8">—HAS_SAMPLE→</span>
+                    <span class="chip msg a pop" style="--t:6.9">Fit sample · body length −2 cm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pform"><div class="input"><span class="swap" style="display:inline-grid;width:100%"><span class="ph-swap" style="animation:out .15s both,fade .3s both;animation-delay:.55s,2.3s">Ask anything about your drop…</span><span class="a out" style="--t:2.3;animation-duration:.15s"><span class="typed" data-dur="1.6" style="--t:.6">How is the Black Drop doing, and what should I do next?</span><i class="caret" style="--t:.6;--t2:2.3"></i></span></span></div><span class="btn lg">Ask</span></div>
+        </aside>
+        <div class="right">
+          <section class="card a rise" style="--t:.2">
+            <div class="card-head"><h5>Your call</h5><span class="muted swap" style="font-size:13px"><span class="a out" style="--t:7.9">2</span><span class="a fade" style="--t:7.9">1</span></span></div>
+            <div class="callwrap"><div class="call">
+              <div class="call-who"><span class="avatar av-pattern">P</span>Pattern: Drafted a restock</div>
+              <div class="call-body">Black leggings M sold out on day 4. Restock from Kavya Garments, who made this batch (10-day lead time).</div>
+              <div class="row"><span class="tap" style="--t:7.55"><span class="btn sm">Approve PO</span><i class="cursor"></i></span><span class="btn dawn sm">Scenario</span><span class="btn quiet sm">Ignore</span></div>
+            </div></div>
+            <div class="newpo">
+              <div class="row" style="justify-content:space-between"><span class="mono" style="font-weight:600">PO-022</span><span class="badge risk">sent</span></div>
+              <b style="font-weight:600">Leggings · Black · M · 340 pcs</b>
+              <div class="row mono" style="font-size:12px;gap:14px"><span>₹420/pc</span><span>₹1,42,800</span><span>due 20 Dec</span></div>
+              <div class="row"><span class="chip vendor">Kavya Garments</span><span class="chip decision">Approved · decision recorded</span></div>
+            </div>
+            <div class="call" style="border-style:solid;border-color:var(--line-2);background:var(--surface-2)">
+              <div class="call-who" style="color:var(--fathom)"><span class="avatar av-shuttle">S</span>Shuttle: Kavya asked to change a date</div>
+              <div class="call-body" style="font-size:12.5px">Black tank restock moves from 16 Dec to 19 Dec. 41 days of stock left, no impact.</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <figcaption><span>A sell-out in the shop goes back to the factory that has to remake it, and a return reason goes back to the sample that caused it.</span><button class="replay" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></figcaption>
+  </figure>
+
+  <div class="col">
+    <p class="reveal">That is the loop we wanted: a change at the factory shows up at the creator post, and a sell-out in the shop goes straight back to the factory.</p>
+  </div>
+</section>
+
+<!-- ===================================================== 5. UNDER THE HOOD -->
+<section class="ch" id="hood">
+  <div class="col">
+    <div class="kicker reveal"><span class="sq"></span>Under the hood</div>
+    <h2 class="reveal">Why a graph, and why <em>FalkorDB</em></h2>
+    <p class="reveal">The questions that matter here are about connections, not records. “Which creator posts break if PO-014 is late?” is not a lookup on the PO. It is a walk: PO to SKUs to style to drop, then back in through every post that promotes it. With relational tables, each question like that is a set of joins written by hand. In a graph, the walk is the query, and the same walk can run inside every step a teammate takes.</p>
+    <p class="reveal">One FalkorDB instance holds several graphs: <code>weft</code> is the live plan, <code>weft_live</code> is the day-9 snapshot, <code>weft_meta</code> holds settings and scenario records, and each scenario is its own <code>weft_scn*</code> graph. The app is Next.js 15, and its server components read the graph directly.</p>
+  </div>
+
+  <figure class="scene" id="s-model">
+    <div class="stage model" role="img" aria-label="The graph model: Supplier, PO, SKU, Style, Drop and CreatorPost along the main chain, with CheckIn, Person, Decision, Message, Call, Teammate, Sample and Creator connected around it.">
+      <div class="ui" data-graph="model"></div>
+      <div class="legend ui"><span class="chip vendor">Supplier</span><span class="chip po">PO / SKU</span><span class="chip style">Style</span><span class="chip drop">Drop</span><span class="chip creator">Creator</span><span class="chip decision">Decision</span><span class="chip dawn">Teammate</span><span class="chip msg">Message, CheckIn, Sample</span></div>
+    </div>
+    <figcaption><span>The core of the model. Every node has an <code>id</code>, and decisions, the drop date and creator posts link back to the message they came from.</span></figcaption>
+  </figure>
+
+  <div class="qgrid">
+    <article class="qcard reveal">
+      <span class="label">Multi-hop Cypher</span>
+      <h4>Impact is one traversal</h4>
+      <p>Every delay call runs this. It goes from the PO to its supplier and owner, through SKUs and style to the drop, then out to the creator posts that promise the date.</p>
+<pre class="query">MATCH (po:PO {id:$po})-[:MADE_BY]-&gt;(sup:Supplier), (owner:Person)-[:OWNS]-&gt;(po),
+      (po)-[:SUPPLIES]-&gt;(k:SKU)-[:OF_STYLE]-&gt;(s:Style)-[:IN_DROP]-&gt;(d:Drop)
+OPTIONAL MATCH (cr:Creator)-[:POSTED]-&gt;(p:CreatorPost)-[:PROMOTES]-&gt;(d)
+RETURN po.id AS po, sup.name AS supplier, collect(DISTINCT k.code) AS skus, s.name AS style,
+       d.name AS drop, d.date AS dropDate, owner.name AS owner,
+       collect(DISTINCT {handle: cr.handle, date: p.date}) AS posts</pre>
+    </article>
+    <article class="qcard reveal">
+      <span class="label">GRAPH.COPY</span>
+      <h4>Scenarios are whole graphs</h4>
+      <p>A scenario is a full copy of the plan. The change happens only in the copy. Apply to plan copies the scenario back over the plan, records the decision, and deletes the copy.</p>
+<pre class="query">// graph.copy() issues GRAPH.COPY
+await d.selectGraph(from).copy(to);
+
+// inside the copy only
+MATCH (po:PO {id:$po})-[r:MADE_BY]-&gt;(:Supplier), (to:Supplier {id:$to})
+DELETE r
+CREATE (po)-[:MADE_BY]-&gt;(to)
+SET po.eta = $eta, po.unitPrice = po.unitPrice + 20, po.status = 'accepted'</pre>
+    </article>
+    <article class="qcard reveal">
+      <span class="label">Graph algorithm</span>
+      <h4>PageRank finds the single point of failure</h4>
+      <p>PageRank over the <code>MADE_BY</code> edges ranks the suppliers the drop leans on most. It is how Today knows that Sri Lakshmi Knits carries 9 of the 15 SKUs.</p>
+<pre class="query">CALL algo.pageRank(null, 'MADE_BY') YIELD node, score
+WITH node, score WHERE node:Supplier
+OPTIONAL MATCH (node)&lt;-[:MADE_BY]-(:PO)-[:SUPPLIES]-&gt;(k:SKU)
+RETURN node.name AS name, score, count(k) AS skus ORDER BY score DESC</pre>
+    </article>
+    <article class="qcard reveal">
+      <span class="label">Full-text index</span>
+      <h4>Search lives on the same graph</h4>
+      <p>Full-text indexes over SKUs, styles, suppliers, POs and creators power Brand map search. Searching “olive” lights up every matching node.</p>
+<pre class="query">await g.createNodeFulltextIndex("SKU", "code", "colour", "line");
+
+CALL db.idx.fulltext.queryNodes($label, $term) YIELD node
+RETURN node.id AS id</pre>
+    </article>
+    <article class="qcard wide reveal">
+      <span class="label">GRAPH.RO_QUERY</span>
+      <h4>Teammates query the graph, they never write to it</h4>
+      <p>Weft, Shuttle and Pattern are one Claude model in a tool loop of up to eight turns. Its only tool is <code>run_cypher</code>, which takes a query and a one-line reason. Every call runs through <code>GRAPH.RO_QUERY</code>, so a teammate can read anything and change nothing. Each query is recorded with its row count and shown under <i>See why</i>. Plan changes go through calls that a person approves.</p>
+<pre class="query">{ name: "run_cypher",
+  description: "Run a read-only openCypher query against the brand's FalkorDB graph ...",
+  input_schema: { properties: { query: { type: "string" }, why: { type: "string" } } } }
+
+// every tool call
+await (await db()).selectGraph(graph).roQuery(cypher, { params });   // GRAPH.RO_QUERY</pre>
+    </article>
+  </div>
+  <div class="lesson-wrap">
+    <div class="lesson reveal">
+      <span class="label">One honest lesson</span>
+      <p>We first wrote <i>See why</i> paths with <code>shortestPath()</code>. In FalkorDB it follows edges in their stored direction only, and our paths run both ways: a decision points at a PO, a creator post points at the drop. So See why uses a bounded variable-length match, ordered by length:</p>
+<pre class="query">MATCH (a {id:$a}), (b {id:$b})
+MATCH p = (a)-[*1..5]-(b)
+WITH p, length(p) AS len ORDER BY len LIMIT 1
+RETURN [n IN nodes(p) | n.id] AS ids</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================== 6. ROADMAP -->
+<section class="ch" id="roadmap">
+  <div class="col">
+    <div class="kicker reveal"><span class="sq"></span>Roadmap</div>
+    <h2 class="reveal">Short list</h2>
+    <ul class="roadmap reveal">
+      <li><span>01</span><div><b>Shopify connector.</b> Orders, inventory and discount codes flow into the graph in place of seeded sales.</div></li>
+      <li><span>02</span><div><b>Supplier check-ins over email and WhatsApp.</b> Resend for email, WhatsApp quick replies for the one-tap answers.</div></li>
+      <li><span>03</span><div><b>Teammates propose plan changes from chat.</b> A message like “fabric coming 28th” becomes a call you approve.</div></li>
+      <li><span>04</span><div><b>Roles and sign-in.</b> Owners and Managers decide, the rest of the team and suppliers see what they need.</div></li>
+    </ul>
+  </div>
+</section>
+
+<div class="wrap-close">
+  <div class="close">
+    <p class="big">One graph for the whole drop, so a slip at the factory shows what it breaks at launch.</p>
+    <div class="links">
+      <a class="c1" href="https://github.com/KshitijBhardwaj18/weft">Code on GitHub</a>
+      <a class="c2" href="#">Demo video: &lt;demo video link&gt;</a>
+    </div>
+  </div>
+</div>
+<p class="foot">Weft was built for FalkorDB Graph Hacks with Claude Code as a pair programmer. We designed the product, the graph model and the queries.</p>
+
+<script>
+(() => {
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NS = "http://www.w3.org/2000/svg";
+
+  /* ---------- graph specs ---------- */
+  const G = {
+    snap: { vb: [960, 410], mvb: [370, 432], nodes: [
+      { id: "ci", t: "CheckIn · fabric for PO-014", s: "answer: delayed to 28 Nov", k: "ci", d: [262, 82], m: null, at: 2.4 },
+      { id: "sri", t: "Sri Lakshmi Knits", s: "Supplier · Tiruppur", k: "sup", d: [100, 200], m: [185, 34], at: 2.22 },
+      { id: "po", t: "PO-014", s: "600 pcs · ₹420", k: "po", d: [262, 200], m: [185, 104], at: 2.31 },
+      { id: "s1", t: "LEG-BLK-S", k: "sku", d: [410, 140], m: [62, 176], at: 2.6 },
+      { id: "s2", t: "LEG-BLK-M", k: "sku", d: [410, 200], m: [185, 176], at: 2.66 },
+      { id: "s3", t: "LEG-BLK-L", k: "sku", d: [410, 260], m: [308, 176], at: 2.72 },
+      { id: "sty", t: "Core Leggings", s: "Style · ₹2,499", k: "style", d: [560, 200], m: [185, 248], at: 2.49 },
+      { id: "drop", t: "Black Drop", s: "Drop · 1 Dec", k: "drop", d: [706, 200], m: [185, 320], at: 2.58 },
+      { id: "p1", t: "@runwithria", s: "post · live 1 Dec", k: "post", d: [876, 128], m: [62, 398], at: 2.67 },
+      { id: "p2", t: "@liftwithdev", s: "post · live 1 Dec", k: "post", d: [876, 200], m: [185, 398], at: 2.76 },
+      { id: "p3", t: "@yogawithtara", s: "post · live 1 Dec", k: "post", d: [876, 272], m: [308, 398], at: 2.85 },
+      { id: "kav", t: "Kavya Garments", k: "sup", d: [100, 365], m: null, at: 4.45, cls: "ctx" },
+      { id: "po15", t: "PO-015", k: "po", d: [262, 310], m: null, at: 4.45, cls: "ctx" },
+      { id: "po18", t: "PO-018", k: "po", d: [262, 365], m: null, at: 4.5, cls: "ctx" },
+      { id: "b3", t: "BRA-BLK ×3", k: "sku", d: [410, 310], m: null, at: 4.5, cls: "ctx" },
+      { id: "t3", t: "TNK-BLK ×3", k: "sku", d: [410, 365], m: null, at: 4.55, cls: "ctx" },
+      { id: "bra", t: "Sculpt Sports Bra", k: "style", d: [560, 310], m: null, at: 4.55, cls: "ctx" },
+      { id: "tank", t: "Everyday Tank", k: "style", d: [560, 365], m: null, at: 4.6, cls: "ctx" },
+    ], edges: [
+      { a: "po", b: "sri", l: "MADE_BY", ld: [181, 193], lm: [222, 72], at: 2.9 },
+      { a: "po", b: "ci", l: "HAS_CHECKIN", ld: [298, 143], at: 3.0, la: "start" },
+      { a: "po", b: "s1", at: 3.15 }, { a: "po", b: "s2", l: "SUPPLIES", ld: [336, 193], lm: [222, 143], at: 3.2 }, { a: "po", b: "s3", at: 3.25 },
+      { a: "s1", b: "sty", at: 3.45 }, { a: "s2", b: "sty", l: "OF_STYLE", ld: [486, 193], lm: [222, 215], at: 3.5 }, { a: "s3", b: "sty", at: 3.55 },
+      { a: "sty", b: "drop", l: "IN_DROP", ld: [633, 193], lm: [218, 287], at: 3.75 },
+      { a: "p1", b: "drop", at: 3.95 }, { a: "p2", b: "drop", l: "PROMOTES", ld: [786, 193], lm: [222, 362], at: 4.0 }, { a: "p3", b: "drop", at: 4.05 },
+      { a: "po15", b: "sri", at: 4.6, cls: "ctx" }, { a: "po18", b: "kav", at: 4.65, cls: "ctx" },
+      { a: "po15", b: "b3", at: 4.7, cls: "ctx" }, { a: "po18", b: "t3", at: 4.7, cls: "ctx" },
+      { a: "b3", b: "bra", at: 4.8, cls: "ctx" }, { a: "t3", b: "tank", at: 4.8, cls: "ctx" },
+      { a: "bra", b: "drop", at: 4.9, cls: "ctx" }, { a: "tank", b: "drop", at: 4.9, cls: "ctx" },
+    ] },
+
+    impact: { vb: [452, 416], nodes: [
+      { id: "sri", t: "Sri Lakshmi Knits", k: "sup", d: [226, 30], at: .5 },
+      { id: "tag", t: "says fabric arrives 28 Nov", k: "tag", d: [370, 30], at: 1.7, w: 150 },
+      { id: "po", t: "PO-014", s: "600 pcs · due 20 Nov", k: "po", d: [226, 100], at: .55, h: 2.2, ring: 1 },
+      { id: "s1", t: "LEG-BLK-S", k: "sku", d: [96, 172], at: .6, h: 2.75 },
+      { id: "s2", t: "LEG-BLK-M", k: "sku", d: [226, 172], at: .65, h: 2.8 },
+      { id: "s3", t: "LEG-BLK-L", k: "sku", d: [356, 172], at: .7, h: 2.85 },
+      { id: "sty", t: "Core Leggings", s: "Style", k: "style", d: [226, 242], at: .75, h: 3.25 },
+      { id: "drop", t: "Black Drop", s: "Drop · 1 Dec", k: "drop", d: [226, 312], at: .8, h: 3.75, ring: 1 },
+      { id: "late", t: "lands ~5 Dec · 4 days late", k: "blate", d: [366, 312], at: 3.9, w: 150 },
+      { id: "p1", t: "@runwithria", s: "post · live 1 Dec", k: "post", d: [86, 390], at: .85, h: 4.3, strike: 1 },
+      { id: "p2", t: "@liftwithdev", s: "post · live 1 Dec", k: "post", d: [226, 390], at: .9, h: 4.42, strike: 1 },
+      { id: "p3", t: "@yogawithtara", s: "post · live 1 Dec", k: "post", d: [366, 390], at: .95, h: 4.54, strike: 1 },
+    ], edges: [
+      { a: "po", b: "sri", l: "MADE_BY", ld: [234, 69], la: "start", at: 1, h: 1.9, rev: 1 },
+      { a: "po", b: "s1", at: 1.05, h: 2.42 }, { a: "po", b: "s2", l: "SUPPLIES", ld: [234, 140], la: "start", at: 1.05, h: 2.42 }, { a: "po", b: "s3", at: 1.05, h: 2.42 },
+      { a: "s1", b: "sty", at: 1.1, h: 2.95 }, { a: "s2", b: "sty", l: "OF_STYLE", ld: [234, 211], la: "start", at: 1.1, h: 2.95 }, { a: "s3", b: "sty", at: 1.1, h: 2.95 },
+      { a: "sty", b: "drop", l: "IN_DROP", ld: [234, 281], la: "start", at: 1.15, h: 3.45 },
+      { a: "p1", b: "drop", at: 1.2, h: 4.0, rev: 1 }, { a: "p2", b: "drop", l: "PROMOTES", ld: [234, 356], la: "start", at: 1.2, h: 4.0, rev: 1 }, { a: "p3", b: "drop", at: 1.2, h: 4.0, rev: 1 },
+    ] },
+
+    scnReal: { vb: [440, 160], nodes: [
+      { id: "sri", t: "Sri Lakshmi Knits", k: "sup", d: [78, 36], at: .35 },
+      { id: "kav", t: "Kavya Garments", k: "sup", d: [78, 122], at: .4, cls: "ctx" },
+      { id: "po", t: "PO-014", k: "po", d: [225, 36], at: .4, cls: "late" },
+      { id: "lb", t: "lands ~5 Dec", k: "blate", d: [225, 70], at: .5, w: 84 },
+      { id: "sk", t: "LEG-BLK ×3", k: "sku", d: [340, 36], at: .45 },
+      { id: "sty", t: "Core Leggings", k: "style", d: [280, 122], at: .5 },
+      { id: "drop", t: "Black Drop", s: "1 Dec · late", k: "drop", d: [392, 122], at: .55, cls: "late" },
+    ], edges: [
+      { a: "po", b: "sri", l: "MADE_BY", ld: [171, 30], at: .6 }, { a: "po", b: "sk", at: .65 }, { a: "sk", b: "sty", at: .7 }, { a: "sty", b: "drop", at: .75 },
+    ] },
+
+    scnCopy: { vb: [440, 160], nodes: [
+      { id: "sri", t: "Sri Lakshmi Knits", k: "sup", d: [78, 36], at: -9, cls: "sleep" },
+      { id: "kav", t: "Kavya Garments", k: "sup", d: [78, 122], at: -9, cls: "ctx wake" },
+      { id: "po", t: "PO-014", k: "po", d: [225, 36], at: -9, cls: "late fix", c: 3.05 },
+      { id: "lb", t: "lands ~5 Dec", k: "blate", d: [225, 70], at: -9, w: 84, cls: "gone" },
+      { id: "lb2", t: "lands 28 Nov", k: "bok", d: [225, 70], at: 3.15, w: 84 },
+      { id: "sk", t: "LEG-BLK ×3", k: "sku", d: [340, 36], at: -9 },
+      { id: "sty", t: "Core Leggings", k: "style", d: [280, 122], at: -9 },
+      { id: "drop", t: "Black Drop", s: "1 Dec · on time", k: "drop", d: [392, 122], at: -9, cls: "late fix swapsub", c: 3.3, s2: "1 Dec · on time", s1: "1 Dec · late" },
+    ], edges: [
+      { a: "po", b: "sri", l: "MADE_BY", ld: [171, 30], at: -9, cls: "cut" }, { a: "po", b: "kav", l: "MADE_BY", ld: [140, 88], at: 2.75, cls: "new" },
+      { a: "po", b: "sk", at: -9 }, { a: "sk", b: "sty", at: -9 }, { a: "sty", b: "drop", at: -9 },
+    ] },
+
+    model: { vb: [940, 400], mvb: [370, 530], nodes: [
+      { id: "Teammate", t: "Teammate", k: "mate", d: [130, 60], m: [65, 34] },
+      { id: "Call", t: "Call", k: "call", d: [330, 60], m: [185, 34] },
+      { id: "Sample", t: "Sample", k: "sample", d: [560, 60], m: [65, 304] },
+      { id: "Creator", t: "Creator", k: "post", d: [860, 60], m: [65, 486] },
+      { id: "Supplier", t: "Supplier", k: "sup", d: [80, 200], m: [65, 124] },
+      { id: "PO", t: "PO", k: "po", d: [240, 200], m: [185, 124] },
+      { id: "SKU", t: "SKU", k: "sku", d: [400, 200], m: [185, 214] },
+      { id: "Style", t: "Style", k: "style", d: [560, 200], m: [185, 304] },
+      { id: "Drop", t: "Drop", k: "drop", d: [720, 200], m: [185, 394] },
+      { id: "CreatorPost", t: "CreatorPost", k: "post", d: [866, 200], m: [65, 394] },
+      { id: "CheckIn", t: "CheckIn", k: "ci", d: [160, 336], m: [65, 214] },
+      { id: "Person", t: "Person", k: "mate", d: [330, 336], m: [305, 124] },
+      { id: "Decision", t: "Decision", k: "dec", d: [500, 336], m: [305, 214] },
+      { id: "Message", t: "Message", k: "msg", d: [720, 336], m: [305, 394] },
+    ].map((n, i) => ({ ...n, at: .1 + i * .05 })), edges: [
+      { a: "PO", b: "Supplier", l: "MADE_BY" }, { a: "PO", b: "SKU", l: "SUPPLIES" }, { a: "SKU", b: "Style", l: "OF_STYLE" }, { a: "Style", b: "Drop", l: "IN_DROP" },
+      { a: "CreatorPost", b: "Drop", l: "PROMOTES" }, { a: "Creator", b: "CreatorPost", l: "POSTED" }, { a: "Creator", b: "SKU", l: "DROVE", nm: 1 },
+      { a: "PO", b: "CheckIn", l: "HAS_CHECKIN" }, { a: "CheckIn", b: "Supplier", l: "ASKED" }, { a: "Person", b: "PO", l: "OWNS" },
+      { a: "Person", b: "Decision", l: "DECIDED" }, { a: "Decision", b: "PO", l: "ABOUT" }, { a: "Decision", b: "Message", l: "SOURCED_FROM" },
+      { a: "Drop", b: "Message", l: "SOURCED_FROM", nl: 1 }, { a: "CreatorPost", b: "Message", l: "SOURCED_FROM", nm: 1, nl: 1 },
+      { a: "Style", b: "Sample", l: "HAS_SAMPLE" }, { a: "Call", b: "Teammate", l: "RAISED_BY" }, { a: "Call", b: "PO", l: "ABOUT" }, { a: "Call", b: "SKU", l: "ABOUT", cm: [250, 124], nl: 1 },
+    ].map((e, i) => ({ ...e, at: .6 + i * .05 })) },
+  };
+
+  const el = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const isMono = (k) => k === "sku" || k === "po";
+  const widthOf = (n) => n.w || Math.round(Math.max(n.t.length * (isMono(n.k) ? 6.7 : 6.75), n.s ? n.s.length * 5.5 : 0) + 24);
+  const clip = ([cx, cy], [w, h], [dx, dy]) => {
+    const t = Math.min(dx ? (w / 2 + 3) / Math.abs(dx) : 1e9, dy ? (h / 2 + 3) / Math.abs(dy) : 1e9);
+    return [cx + dx * t, cy + dy * t];
+  };
+  const f = (v) => +v.toFixed(1);
+
+  function buildGraph(host, spec) {
+    const modes = spec.mvb ? ["d", "m"] : ["d"];
+    for (const mode of modes) {
+      const vb = mode === "d" ? spec.vb : spec.mvb;
+      const svg = el("svg", { viewBox: `0 0 ${vb[0]} ${vb[1]}`, class: `graph g-${mode}`, "aria-hidden": "true" });
+      const pos = {}, size = {};
+      for (const n of spec.nodes) {
+        const p = mode === "d" ? n.d : n.m === undefined ? n.d : n.m;
+        if (!p) continue;
+        pos[n.id] = p;
+        size[n.id] = [widthOf(n), n.s ? 38 : n.k === "blate" || n.k === "bok" || n.k === "tag" ? 22 : 28];
+      }
+      const gE = el("g", {}, svg), gN = el("g", {}, svg), gL = el("g", {}, svg);
+      for (const e of spec.edges) {
+        if (!pos[e.a] || !pos[e.b] || (mode === "m" && e.nm)) continue;
+        const A = pos[e.a], B = pos[e.b], C = mode === "m" ? e.cm : e.c;
+        const p1 = clip(A, size[e.a], C ? [C[0] - A[0], C[1] - A[1]] : [B[0] - A[0], B[1] - A[1]]);
+        const p2 = clip(B, size[e.b], C ? [C[0] - B[0], C[1] - B[1]] : [A[0] - B[0], A[1] - B[1]]);
+        const d = C ? `M${f(p1[0])} ${f(p1[1])} Q${C[0]} ${C[1]} ${f(p2[0])} ${f(p2[1])}` : `M${f(p1[0])} ${f(p1[1])} L${f(p2[0])} ${f(p2[1])}`;
+        const g = el("g", { class: `e ${e.cls || ""}`, style: `--t:${e.at ?? 0}` }, gE);
+        el("path", { class: "ln", d, pathLength: 1 }, g);
+        const from = C || p1, ang = Math.atan2(p2[1] - from[1], p2[0] - from[0]);
+        const ax = (r, a) => `${f(p2[0] - r * Math.cos(ang + a))} ${f(p2[1] - r * Math.sin(ang + a))}`;
+        el("path", { class: "ar", d: `M${f(p2[0])} ${f(p2[1])} L${ax(7, .42)} L${ax(7, -.42)} Z` }, g);
+        if (e.h !== undefined) {
+          const hd = e.rev ? (C ? `M${f(p2[0])} ${f(p2[1])} Q${C[0]} ${C[1]} ${f(p1[0])} ${f(p1[1])}` : `M${f(p2[0])} ${f(p2[1])} L${f(p1[0])} ${f(p1[1])}`) : d;
+          el("path", { class: "hot", d: hd, pathLength: 1, style: `--h:${e.h}` }, g);
+        }
+        if (e.l && !(mode === "m" && e.nl)) {
+          const lp = mode === "d" ? e.ld : e.lm;
+          const at = lp || [(p1[0] + p2[0]) / 2 + (C ? (C[0] - (p1[0] + p2[0]) / 2) / 2 : 0), (p1[1] + p2[1]) / 2 + (C ? (C[1] - (p1[1] + p2[1]) / 2) / 2 : 0) - 4];
+          if (lp || !spec.ld) {
+            const t = el("text", { class: "el", x: f(at[0]), y: f(at[1]), "text-anchor": e.la || "middle", style: `--t:${e.at ?? 0}` }, gL);
+            t.textContent = e.l;
+          }
+        }
+      }
+      for (const n of spec.nodes) {
+        if (!pos[n.id]) continue;
+        const [w, h] = size[n.id];
+        const outer = el("g", { class: `n k-${n.k} ${n.cls || ""} ${n.h !== undefined ? "hot" : ""}`, transform: `translate(${pos[n.id][0]} ${pos[n.id][1]})` }, gN);
+        const nb = el("g", { class: "nb", style: `--t:${n.at ?? 0};--h:${n.h ?? 0};--c:${n.c ?? 0}` }, outer);
+        if (n.ring) el("circle", { class: "ring", r: 16 }, nb);
+        el("rect", { x: -w / 2, y: -h / 2, width: w, height: h, rx: h < 26 ? h / 2 : 9 }, nb);
+        const tt = el("text", { class: "nt", y: n.s ? -2.5 : 4.2 }, nb); tt.textContent = n.t;
+        if (n.s1) {
+          const a = el("text", { class: "ns s-old", y: 11.5 }, nb); a.textContent = n.s1;
+          const b = el("text", { class: "ns s-new", y: 11.5 }, nb); b.textContent = n.s2;
+        } else if (n.s) { const s = el("text", { class: "ns", y: 11.5 }, nb); s.textContent = n.s; }
+        if (n.strike) el("line", { class: "strike", x1: -n.s.length * 2.75, x2: n.s.length * 2.75, y1: 8.5, y2: 8.5 }, nb);
+      }
+      host.appendChild(svg);
+    }
+  }
+  document.querySelectorAll("[data-graph]").forEach((h) => buildGraph(h, G[h.dataset.graph]));
+
+  /* hero weave warp lines */
+  const warp = document.getElementById("warp");
+  for (let x = 20; x < 1200; x += 40) el("line", { x1: x, x2: x, y1: 14, y2: 112 }, warp);
+
+  /* ---------- streamed answers, typed questions ---------- */
+  document.querySelectorAll(".stream").forEach((s) => {
+    const t0 = +s.dataset.t, step = +(s.dataset.step || .04);
+    let i = 0;
+    const delay = () => `${(t0 + i++ * step).toFixed(3)}s`;
+    const walk = (node) => [...node.childNodes].forEach((c) => {
+      if (c.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        c.textContent.split(/(\s+)/).forEach((p) => {
+          if (!p) return;
+          if (/^\s+$/.test(p)) return frag.append(p);
+          const w = document.createElement("span"); w.className = "w"; w.style.animationDelay = delay(); w.textContent = p; frag.append(w);
+        });
+        c.replaceWith(frag);
+      } else if (c.nodeType === 1) {
+        if (c.classList.contains("chip")) { c.classList.add("w"); c.style.animationDelay = delay(); }
+        else walk(c);
+      }
+    });
+    walk(s);
+  });
+  const typed = [...document.querySelectorAll(".typed")];
+  typed.forEach((t) => {
+    t.style.animationDuration = `${t.dataset.dur || 1}s`;
+    t.style.animationTimingFunction = `steps(${t.textContent.length})`;
+  });
+  const measure = () => typed.forEach((t) => t.style.setProperty("--w", `${t.scrollWidth + 1}px`));
+  measure();
+  if (document.fonts) document.fonts.ready.then(measure);
+
+  /* ---------- live tabs highlight widths ---------- */
+  const fitTabs = () => document.querySelectorAll(".lv .tabs").forEach((tb) => {
+    const [a, b] = tb.querySelectorAll(":scope > span");
+    tb.style.setProperty("--w1", `${a.offsetWidth}px`); tb.style.setProperty("--w2", `${b.offsetWidth}px`);
+  });
+  fitTabs();
+  if (document.fonts) document.fonts.ready.then(fitTabs);
+
+  /* ---------- chat list choreography (WAAPI) ---------- */
+  document.querySelectorAll("[data-slots]").forEach((r) => {
+    const H = 58, T = 8;
+    const steps = r.dataset.slots.split(",").map((s) => s.split("@").map(Number));
+    let prev = steps[0][0];
+    const kf = [{ offset: 0, transform: `translateY(${prev * H}px)` }];
+    for (const [slot, t] of steps.slice(1)) {
+      kf.push({ offset: t / T, transform: `translateY(${prev * H}px)`, easing: "cubic-bezier(.22,1,.36,1)" });
+      kf.push({ offset: (t + .5) / T, transform: `translateY(${slot * H}px)` });
+      prev = slot;
+    }
+    kf.push({ offset: 1, transform: `translateY(${prev * H}px)` });
+    r.style.transform = `translateY(${prev * H}px)`;
+    r.animate(kf, { duration: T * 1000, fill: "both" });
+  });
+
+  /* ---------- Cypher highlighting ---------- */
+  const KW = /\b(MATCH|OPTIONAL|RETURN|WITH|WHERE|CREATE|DELETE|SET|CALL|YIELD|ORDER BY|LIMIT|DISTINCT|AS|IN|await|const|null)\b/g;
+  document.querySelectorAll("pre.query").forEach((p) => {
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    p.innerHTML = p.textContent.split("\n").map((line) => {
+      const ci = line.indexOf("//");
+      const code = ci >= 0 ? line.slice(0, ci) : line, com = ci >= 0 ? line.slice(ci) : "";
+      const out = esc(code).replace(/('[^']*'|"[^"]*"|\$\w+)|(:[A-Z][A-Za-z_]+)|\b(MATCH|OPTIONAL|RETURN|WITH|WHERE|CREATE|DELETE|SET|CALL|YIELD|ORDER BY|LIMIT|DISTINCT|AS|IN|await|const|null)\b|\b(algo\.pageRank|db\.idx\.fulltext\.queryNodes|collect|count|length|nodes|toFloat)\b/g,
+        (m, s, l, k, fn) => s ? `<span class="tok-s">${m}</span>` : l ? `<span class="tok-l">${m}</span>` : k ? `<span class="tok-k">${m}</span>` : `<span class="tok-f">${m}</span>`);
+      return out + (com ? `<span class="tok-c">${esc(com)}</span>` : "");
+    }).join("\n");
+  });
+
+  /* ---------- stage scaling: fixed 960x540 design, scaled to fit ---------- */
+  const ro = new ResizeObserver((es) => es.forEach((e) => e.target.style.setProperty("--k", (e.contentRect.width / 960).toFixed(4))));
+  document.querySelectorAll(".stage.fix").forEach((s) => ro.observe(s));
+
+  /* ---------- scene playback ---------- */
+  const scenes = [...document.querySelectorAll(".scene")];
+  const anims = (s) => s.getAnimations({ subtree: true });
+  const play = (s) => anims(s).forEach((a) => { a.currentTime = 0; a.play(); });
+  scenes.forEach((s) => anims(s).forEach((a) => {
+    if (RM) { try { a.finish(); } catch { a.cancel(); } }
+    else { a.pause(); a.currentTime = 0; }
+  }));
+  scenes.forEach((s) => s.querySelector(".replay")?.addEventListener("click", () => RM ? null : play(s)));
+  if (RM) document.querySelectorAll(".replay").forEach((b) => b.remove());
+
+  if (!window.CAPTURE) {
+    if (!RM) {
+      const io = new IntersectionObserver((es) => es.forEach((e) => {
+        if (e.isIntersecting) { play(e.target); io.unobserve(e.target); }
+      }), { threshold: .3, rootMargin: "0px 0px -10% 0px" });
+      scenes.forEach((s) => io.observe(s));
+    }
+    const rv = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("in"); rv.unobserve(e.target); }
+    }), { rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".reveal").forEach((r) => RM ? r.classList.add("in") : rv.observe(r));
+  }
+})();
+</script>
+<!--capture-->
+</body>
+</html>

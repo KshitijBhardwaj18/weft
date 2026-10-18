@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weft: one live plan from planning to restock</title>
+<meta name="description" content="How we built Weft for FalkorDB Graph Hacks: one live plan per product on a FalkorDB graph, from planning through making, selling and restocking, with AI teammates that chase the updates and show what every change breaks.">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#F4F3EC;--surface:#FFFEF8;--raised:#ECEBE1;
+  --ink:#1A1A1A;--ink-2:#5F5E5A;--line:rgba(26,26,26,.1);
+  --fathom:#034F46;--fathom-soft:#CFE6E1;--glow-soft:#FCEBCF;--glow-ink:#6B4300;
+  --dawn-soft:#F7F1FB;--dawn-ink:#4A1F70;--pulse:#7F1C34;--ok-soft:#CEF5CA;--ok-ink:#114E0B;
+  --serif:"EB Garamond",Georgia,serif;--sans:Figtree,system-ui,-apple-system,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--canvas)}
+body{margin:0;font:400 18px/1.62 var(--sans);color:var(--ink)}
+a{color:var(--fathom)}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px}
+.wide{max-width:1080px;margin:0 auto;padding:0 24px}
+header.top{padding:22px 0;border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center}
+.brand{font:500 24px var(--serif);color:var(--ink);text-decoration:none}
+.top a.gh{font-size:14px;font-weight:600;text-decoration:none}
+.eyebrow{font:700 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--fathom)}
+h1{font:400 56px/1.04 var(--serif);letter-spacing:-1.2px;margin:14px 0 18px}
+h1 em,h2 em{color:var(--fathom)}
+h2{font:400 38px/1.1 var(--serif);letter-spacing:-.6px;margin:64px 0 14px}
+h3{font:600 20px/1.3 var(--sans);margin:34px 0 8px}
+p{margin:0 0 18px}
+.dek{font:400 22px/1.5 var(--serif);color:var(--ink-2);margin:0 0 22px}
+.byline{font-size:14px;color:var(--ink-2);margin-bottom:34px}
+.video{background:var(--ink);border-radius:16px;overflow:hidden;box-shadow:0 18px 40px rgba(26,26,26,.18);margin:8px 0 6px}
+.video video{display:block;width:100%;height:auto}
+.caption{font-size:14px;color:var(--ink-2);margin-bottom:10px}
+figure{margin:28px 0}
+figure img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+figcaption{font-size:14px;color:var(--ink-2);margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:15px;margin:20px 0 26px;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+th,td{text-align:left;padding:11px 14px;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font:700 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);background:var(--raised)}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font:600 12px var(--sans);padding:3px 9px;border-radius:999px;white-space:nowrap}
+.t-built{background:var(--ok-soft);color:var(--ok-ink)}
+.t-part{background:var(--glow-soft);color:var(--glow-ink)}
+.t-next{background:var(--raised);color:var(--ink-2)}
+pre{font:400 14px/1.55 var(--mono);background:var(--ink);color:#EDEDE6;padding:18px 20px;border-radius:12px;overflow-x:auto}
+code{font:400 .92em var(--mono);background:var(--raised);padding:1px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:stretch;margin:24px 0 10px}
+.flow .arr{align-self:center;font:600 22px var(--sans);color:var(--ink-2)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;font-size:15px;line-height:1.5}
+.box b{display:block;font:700 13px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--fathom);margin-bottom:8px}
+.box.graph{background:var(--fathom);color:var(--fathom-soft);border-color:var(--fathom)}
+.box.graph b{color:#FFFEF8}
+.callout{background:var(--surface);border-left:4px solid var(--fathom);border-radius:10px;padding:16px 20px;margin:26px 0;font-size:16px}
+.built,.next{border-radius:14px;padding:20px 22px;margin:14px 0}
+.built{background:var(--surface);border:1px solid var(--line)}
+.next{background:var(--dawn-soft)}
+ul{padding-left:22px;margin:0 0 18px}
+li{margin:6px 0}
+footer{margin:70px 0 50px;padding-top:22px;border-top:1px solid var(--line);font-size:15px;color:var(--ink-2)}
+@media (max-width:760px){h1{font-size:40px}h2{font-size:30px}.flow{grid-template-columns:1fr}.flow .arr{transform:rotate(90deg);justify-self:center}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#">Weft</a>
+    <a class="gh" href="https://github.com/KshitijBhardwaj18/weft">Code on GitHub →</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+<div class="eyebrow" style="margin-top:56px">Built for FalkorDB Graph Hacks</div>
+<h1>One live plan, from <em>planning</em> to restock</h1>
+<p class="dek">A D2C product is planned, made, sold and restocked, and each stage lives in a different tool. Weft keeps one live plan per product on a FalkorDB graph, from the first sample to the next reorder, with AI teammates that chase the updates and show what every change breaks.</p>
+<div class="byline">Kshitij Bhardwaj · 10 minute read</div>
+
+<div class="video">
+  <video controls preload="metadata" poster="screens/stock-received.png">
+    <source src="../demo/weft-demo.mp4" type="video/mp4">
+    Your browser does not play this video. Download <a href="../demo/weft-demo.mp4">the demo</a>.
+  </video>
+</div>
+<div class="caption">The demo: a screen recording of the running app on the Black Drop case study, with captions. About two minutes.</div>
+
+<h2>The problem</h2>
+<p>Thirteen days before our Black Drop goes live, a message arrives in a WhatsApp group: the fabric for the leggings is late. It sits between a dozen other messages. Three creators have already scheduled posts that say the drop goes live on 1 December. Nothing we use connects the two.</p>
+<p>That is the first failure. The second comes after launch. The black leggings in size M sell out on day four, and the reorder waits a week, because nobody compared sell-through with the supplier's lead time. The third is quieter. When the restock arrives, the stock count is still wrong, so the next reorder is wrong too.</p>
+<p>A D2C product is planned, made, sold and restocked. Each stage has its own tool, and the founder carries information between them. Every tool sees one stage. The problems that matter sit at the joins, and they stay invisible until a customer or a creator notices.</p>
+
+<h2>The loop</h2>
+<p>Weft follows one product through six stages. Each stage reads and writes the same graph, so a change in one stage shows up in the others.</p>
+<table>
+  <tr><th>Stage</th><th>Today</th><th>With Weft</th><th>Status</th></tr>
+  <tr><td><b>Plan</b></td><td>Styles, SKUs and units in a spreadsheet</td><td>Drop, styles, SKUs and samples as connected nodes</td><td><span class="tag t-part">Seeded. Creating in the app is next</span></td></tr>
+  <tr><td><b>Make</b></td><td>POs and delays in chat and Excel</td><td>Check-ins, delay calls with their impact, scenarios</td><td><span class="tag t-built">Built</span></td></tr>
+  <tr><td><b>Launch</b></td><td>Creator post dates in a calendar</td><td>The drop date on the same graph as every post and PO that depends on it</td><td><span class="tag t-built">Built</span></td></tr>
+  <tr><td><b>Sell</b></td><td>One Shopify dashboard per question</td><td>Orders, refunds and returns written onto SKU and creator nodes</td><td><span class="tag t-built">Built. Demo uses seeded orders</span></td></tr>
+  <tr><td><b>Restock</b></td><td>Judgement, or a late reorder</td><td>A restock drafted from sell-through and lead time, a PO on approval, stock up on receipt</td><td><span class="tag t-built">Built</span></td></tr>
+  <tr><td><b>Learn</b></td><td>Decisions kept in memory</td><td>Decisions recorded with their source; creators ranked by orders and repeat rate</td><td><span class="tag t-part">Partly built</span></td></tr>
+</table>
+
+<h2>The case study: the Black Drop</h2>
+<p>The case study is a premium fitness-wear brand in India and its first collection. Three styles (Core Leggings, Sculpt Sports Bra, Everyday Tank) make fifteen SKUs in black and olive, sizes S, M and L, for 2,100 units. Sri Lakshmi Knits in Tiruppur makes the leggings and the bra on a 14-day lead time. Kavya Garments in Bengaluru makes the tanks on 10 days. Three creators, each with a discount code, post on 25 November.</p>
+<p>The demo runs in two states of the same plan: <b>Countdown</b> on 18 November, before launch, and <b>Live</b> on 10 December, day nine.</p>
+
+<h2>Walkthrough</h2>
+
+<h3>1 · Plan</h3>
+<p>Today opens thirteen days before the drop. Production, samples, creators and suppliers are one plan, and every PO status comes from the graph, not from a list someone maintains.</p>
+
+<h3>2 · Make: a delay becomes a call</h3>
+<p>The supplier's view shows Murugan at Sri Lakshmi only his own POs and check-ins. Shuttle, the production teammate, asks before a date is due: <i>is the fabric in for PO-014?</i> Murugan answers in one tap, either <i>Yes, arrived</i> or <i>Delayed</i> with a new date.</p>
+<figure>
+  <img src="screens/checkin.png" alt="Shuttle's check-in on PO-014 in the supplier's view" loading="lazy">
+  <figcaption>Murugan's view: only his POs and the check-in Shuttle asked.</figcaption>
+</figure>
+<p>That answer is a fact on the graph, and it raises a delay call. Weft walks the impact in one query: from the PO, through its SKUs and style, to the drop, and back in through every creator post that promises the drop date.</p>
+<pre><code>MATCH (po:PO {id:$po})-[:MADE_BY]-&gt;(sup:Supplier), (owner:Person)-[:OWNS]-&gt;(po),
+      (po)-[:SUPPLIES]-&gt;(k:SKU)-[:OF_STYLE]-&gt;(s:Style)-[:IN_DROP]-&gt;(d:Drop)
+OPTIONAL MATCH (cr:Creator)-[:POSTED]-&gt;(p:CreatorPost)-[:PROMOTES]-&gt;(d)
+RETURN po.id AS po, sup.name AS supplier, collect(DISTINCT k.code) AS skus, s.name AS style,
+       d.name AS drop, d.date AS dropDate, owner.name AS owner,
+       collect(DISTINCT {handle: cr.handle, date: p.date}) AS posts</code></pre>
+<p>In the demo, the fabric lands four days late, on 5 December. Three creator posts announcing 1 December would break.</p>
+
+<h3>3 · Scenario: test the change before making it</h3>
+<p>A scenario is a private copy of the whole plan, made with <code>GRAPH.COPY</code>. We change the copy and compare it with reality. Here the change is moving PO-014 to Kavya Garments, whose 10-day lead time lands the order before launch.</p>
+<figure>
+  <img src="screens/scenario-compare.png" alt="Comparison of reality and the Kavya scenario for PO-014" loading="lazy">
+  <figcaption>Reality against the scenario, asked of the same graph: arrival, drop, posts and cost.</figcaption>
+</figure>
+<p><i>Apply to plan</i> copies the scenario over the plan, records the decision with who made it and when, and deletes the scenario graph.</p>
+
+<h3>4 · Sell: day nine of the drop</h3>
+<p>Switch the clock to Live. Sixty-two percent of the 2,100 units have sold, 1,307 in all. The sell-through heatmap shows black leggings in size M sold out on day four. Revenue, returns and creator ranking come from the same graph.</p>
+<figure>
+  <img src="screens/sell-day9.png" alt="Today in Live, day nine: 62 percent sold and the sell-through heatmap" loading="lazy">
+  <figcaption>Day nine: sell-through, the restock Pattern drafted, and the creators by orders on their code.</figcaption>
+</figure>
+
+<h3>5 · Restock to receipt: the loop closes</h3>
+<p>This is the step most tools miss. Pattern, the sales teammate, drafts the restock from three inputs: sell rate, supplier lead time and stock on hand.</p>
+<pre><code>daysLive = max(1, days from drop date to today)
+rate     = sold / daysLive
+qty      = ceil to 10 of max(0, rate × leadDays − onHand − incoming)
+shown    = qty &gt; 0 and days of stock left (onHand / rate) &lt; 7</code></pre>
+<p><code>incoming</code> is the quantity on POs that have not been received. Earlier the formula ignored open POs, so an approved restock still looked needed. Now an approved restock covers its SKU, and it drops off <i>Restock now</i>.</p>
+<figure>
+  <img src="screens/restock-closed.png" alt="Today after the restock is approved: it no longer appears in Restock now" loading="lazy">
+  <figcaption>After approval, the restock for the black leggings in size M leaves Restock now. The open PO covers it.</figcaption>
+</figure>
+<p>Approving the call writes a new PO with a unique id, priced from that SKU's last PO, and notifies the supplier when email or WhatsApp is configured. When the goods arrive, <i>Mark received</i> adds the PO's quantity to stock, split evenly across the SKUs the PO supplies. The black leggings in size M go from 0 on hand to 340.</p>
+<pre><code>MATCH (po:PO {id:$id})-[:SUPPLIES]-&gt;(k:SKU)
+WITH po, collect(k) AS ks
+UNWIND ks AS k
+SET k.onHand = coalesce(k.onHand, 0) + toInteger(round(toFloat(po.qty) / size(ks)))
+WITH DISTINCT po
+SET po.stage = 'Received', po.status = 'received'</code></pre>
+<figure>
+  <img src="screens/stock-received.png" alt="The Drop page after receipt: black leggings M on hand 340" loading="lazy">
+  <figcaption>Sold, reordered, received. Stock on the Drop page is the same stock the next restock reads.</figcaption>
+</figure>
+
+<h2>How it connects</h2>
+<p>Three kinds of connection make the loop work. Each one writes to the same graph.</p>
+<div class="flow">
+  <div class="box"><b>Sources in</b>Shopify orders, refunds and inventory, as HMAC-verified webhooks.<br>Supplier check-ins by app, email (Resend) or WhatsApp Cloud API.<br>Creator discount codes.</div>
+  <div class="arr">→</div>
+  <div class="box graph"><b>FalkorDB graph</b>The live plan (<code>weft</code>), the day-nine snapshot (<code>weft_live</code>), settings (<code>weft_meta</code>), and a <code>GRAPH.COPY</code> for each scenario.<br>Messages, decisions and calls point back to their source.</div>
+  <div class="arr">→</div>
+  <div class="box"><b>Teammates out</b>Weft (chief of staff), Shuttle (production) and Pattern (sales): one model, one tool, <code>run_cypher</code>.<br>Read-only through <code>GRAPH.RO_QUERY</code>. A teammate proposes a change as a call, and an Owner or Manager decides it.</div>
+</div>
+<figure>
+  <img src="screens/ask-see-why.png" alt="A teammate's answer in Ask, with See why open" loading="lazy">
+  <figcaption>Ask a teammate. See why lists every query behind the answer, with its row count.</figcaption>
+</figure>
+
+<h2>Why the plan is a graph</h2>
+<p>The questions that matter are about connections, not records. "Which creator posts break if PO-014 is late?" is not a lookup on the PO. It is a walk from the PO through its SKUs and style to the drop, and back in through every post that promotes it. A relational schema can answer that with a join written for each question. We wanted the walk to be the query itself, and the same walk to run inside every step an agent takes.</p>
+<ul>
+  <li><b>Multi-hop traversal</b> for delay impact, fast enough to run inside an agent step.</li>
+  <li><b>Many graphs in one instance.</b> Each scenario is its own graph, copied with <code>GRAPH.COPY</code>.</li>
+  <li><b>Built-in algorithms.</b> PageRank over supply edges ranks single points of failure.</li>
+  <li><b>Full-text and range indexes</b> back search on the Brand map and every <code>{id: ...}</code> lookup.</li>
+  <li><b>openCypher</b> is the one query language for the app, the agent tool and the seed script.</li>
+</ul>
+
+<h2>What surprised us</h2>
+<ul>
+  <li><b><code>shortestPath</code> only follows edges in their stated direction.</b> A call points at a PO and a decision points at a message, so many <i>See why</i> paths run against the arrows. We use a bounded variable-length match instead.</li>
+  <li><b>Apply is a whole-graph swap.</b> Applying a scenario copies it over the plan, so a change made to the plan after the copy is lost. A proper merge would take only the scenario's own changes. We have not built that yet.</li>
+  <li><b>A line PO covers several sizes.</b> Its quantity is split evenly across the SKUs it supplies. A restock PO covers one SKU, so its split is exact.</li>
+  <li><b>Shopify's inventory webhook does not carry the SKU.</b> It sends an inventory item id, so the app looks the SKU up. We have not run this against a live store.</li>
+</ul>
+
+<h2>What is built, and what is not</h2>
+<div class="built">
+  <b>Built and shown in the demo.</b> The plan graph, delay impact, scenarios (copy, compare, apply), supplier check-ins and chat, teammate answers with <i>See why</i>, sell-through, returns and creator ranking, the restock draft, approval into a PO, and goods receipt into stock.
+</div>
+<div class="built">
+  <b>Built, not yet run against live services.</b> Shopify orders, refunds and inventory sync and webhooks, Resend emails and the WhatsApp Cloud API. The demo uses seeded orders and skips these integrations when their keys are not set.
+</div>
+<div class="next">
+  <b>Not built yet.</b>
+  <ul>
+    <li>Creating a drop, style, SKU or PO in the app. Planning is read-only today.</li>
+    <li>Sign-in. The app uses an acting-as switcher for roles.</li>
+    <li>A live Shopify store connection, tested end to end.</li>
+    <li>Supplier reliability scores, and a calendar that flags check-ins gone quiet.</li>
+    <li>Stock adjustments and multiple warehouses.</li>
+    <li>A vector index beside the full-text index, for semantic search over messages and notes.</li>
+  </ul>
+</div>
+
+<h2>Run it locally</h2>
+<pre><code>docker compose up -d                 # FalkorDB on port 6380, FalkorDB Browser on port 3001
+cd web &amp;&amp; pnpm install
+cp .env.example .env.local           # then set ANTHROPIC_API_KEY in web/.env.local
+pnpm seed                            # builds the demo graphs
+pnpm dev                             # open http://localhost:3000</code></pre>
+<p>The demo script, with the steps behind the video, is in <a href="../DEMO.md">docs/DEMO.md</a>.</p>
+
+</main>
+
+<footer class="wrap">
+  Weft is built for FalkorDB Graph Hacks, with Claude Code as a pair programmer. <a href="https://github.com/KshitijBhardwaj18/weft">github.com/KshitijBhardwaj18/weft</a>
+</footer>
+
+</body>
+</html>

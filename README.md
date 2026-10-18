@@ -8,7 +8,7 @@ Each tool sees one slice (Shopify sees orders, WhatsApp holds supplier talk, a s
 
 ## Demo
 
-Demo video: `<add link>`
+Demo video: [docs/demo/weft-demo.mp4](docs/demo/weft-demo.mp4), a two-minute recording of the Black Drop case study.
 
 Live deployment: runs locally (see setup)
 
@@ -50,7 +50,7 @@ Each integration is optional and skips cleanly when its keys are unset (see `web
 
 **Act 1, Countdown (18 Nov).** Shuttle has an open check-in on PO-014, the leggings fabric from Sri Lakshmi Knits. Sri Lakshmi says the fabric is delayed. Weft turns that into a delay call: the drop is at risk, and the creator posts from Ria, Dev and Tara that promise 1 Dec are broken. In *Scenarios*, move PO-014 to Kavya Garments. A private copy of the plan is created, and the PO is re-dated from Kavya's 10-day lead time, so it lands before the drop. Compare the two outcomes, then *Apply to plan*. The scenario replaces the plan and a decision is recorded. The move costs 600 units at +₹20 a piece, or ₹12,000.
 
-**Act 2, Live day 9 (10 Dec).** 62% of the 2,100 planned units have sold. The sell-through heatmap shows Black leggings M sold out on day 4. Pattern has drafted a restock from Kavya Garments, who made this batch after the scenario (10-day lead time), and *Your call* applies it as PO-022. The creator panel ranks Ria (RIA15), Dev (DEV10) and Tara (TARA10) by orders, with their repeat rates. Open *Ask* and ask Pattern a question to see the queries behind the answer.
+**Act 2, Live day 9 (10 Dec).** 62% of the 2,100 planned units have sold. The sell-through heatmap shows Black leggings M sold out on day 4. Pattern has drafted a restock from Kavya Garments, who made this batch after the scenario (10-day lead time), and *Your call* applies it as PO-020. The open PO covers that SKU, so it leaves *Restock now*. *Mark received* on the PO adds its quantity to stock. The creator panel ranks Ria (RIA15), Dev (DEV10) and Tara (TARA10) by orders, with their repeat rates. Open *Ask* and ask Pattern a question to see the queries behind the answer.
 
 ## Graph data model
 
@@ -331,7 +331,8 @@ docker-compose.yml          FalkorDB and its browser
 ## Roadmap
 
 - Sign-in with email magic links (Resend), replacing the acting-as switcher.
-- Shopify: inventory-item lookups for `inventory_levels/update`, webhook de-duplication.
+- Shopify: webhook de-duplication, and an end-to-end run against a live store.
+- Create drops, styles, SKUs and POs in the app (planning is read-only today).
 - Scenarios that simulate sales, stock and cash, not only dates and suppliers.
 - Vector index for semantic search over messages, alongside the full-text index.
 - More teammates on the same graph: brand guardian, finance, customer support.

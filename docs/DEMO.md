@@ -22,8 +22,9 @@
 7. Back on **Today**, click **Live · 10 Dec** on the demo clock. "Nine days after launch." Read: 62% sold, ₹27.4L, the heatmap: "black leggings M sold out on day 4, olive tank is crawling."
 8. **⌘J**: **"How is the Black Drop doing, and what should I do next?"** Pattern answers: the sell-out, S and L running low, the olive tank's "too short" returns, the restock and Kavya's date change, all cited from the graph.
 9. Ask **"Why are olive tanks coming back too short?"** — Pattern follows SKU → Style → fit sample note ("body length −2 cm").
-10. In **Your call**, click **Approve PO** on Pattern's restock. "Pattern drafted it, a manager approved it, and it becomes PO-022 for Kavya, landing 20 December."
-11. **Brand map**, search **olive**: "the full-text index, on the same graph."
+10. In **Your call**, click **Approve PO** on Pattern's restock. "Pattern drafted it, a manager approved it, and it becomes PO-020 for Kavya, landing 20 December. The restock drops off Restock now: the open PO already covers it."
+11. **Production**, PO-020 in *Fabric*: click **Mark received**. "Goods arrive, and the quantity goes onto stock." Open **Drops**: black leggings M is on hand 340, up from 0. "Sold, reordered, received. The loop is closed."
+12. **Brand map**, search **olive**: "the full-text index, on the same graph."
 
 ## Close (15 s)
 > "One graph for the whole drop: GRAPH.COPY for scenarios, multi-hop Cypher for impact, PageRank for risk, full-text search, and three teammates that answer by querying it — every answer with its path."

@@ -6,7 +6,9 @@ doc: product
 The operating system for a D2C brand's drops: one live plan, on one graph, that takes a collection from idea to factory to shop and back into the next restock, with AI teammates that chase the updates and show what every change breaks.
 
 ## Problem
-Small D2C brands miss launches and money for things nobody noticed in time: a supplier going quiet, a delay buried in a chat, a size that sold out while the reorder never went out, a decision nobody wrote down. Every tool sees one slice (Shopify sees orders, WhatsApp holds supplier talk, a spreadsheet holds the production plan), so problems that cross from making to selling are invisible until a customer or creator notices.
+A D2C product does not end at launch. It is planned, made, sold and restocked, and each stage lives somewhere else: a spreadsheet for the plan, WhatsApp groups for the factory, Shopify for orders, and the founder's memory for what to reorder. The founder of a 5–30 person brand is the one who routes information between them, every day.
+
+The failures happen at the joins. A supplier's delay sits in a chat and nobody connects it to the creator posts that promised the date. A size sells out on day four and the reorder waits because nobody checked stock against lead time. A decision made on a call is never written down. Every tool sees one stage, so the problem stays invisible until a customer or creator notices.
 
 ## Kernel
 **One live plan for every drop, stored as a FalkorDB graph, that chases its own updates.** Drops, styles, SKUs, suppliers, POs, production stages, stock, orders, returns, creators and decisions are connected nodes, every fact linked to its source and time. The plan is the source of truth and is fully editable in the app; it is kept current four ways: the team in the UI, supplier check-ins (Weft asks before things are due), chat (Weft proposes updates from conversation), and the calendar (a due date passing with no news is itself a signal). Because the plan is a graph, a change anywhere shows what it breaks everywhere, from a fabric delay to the creator posts promising the date, and from a sell-out back to the factory that has to remake it.
