@@ -1,16 +1,18 @@
+import Link from "next/link";
 import { ro } from "@/lib/graph";
-import { activeGraph, drop, phase } from "@/lib/plan";
+import { activeGraph, drop, drops, phase } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
 type Row = { id: string; code: string; style: string; colour: string; size: string; planned: number; sold: number; onHand: number; returns: number; reason: string | null; po: string; supplier: string; eta: string; note: string | null };
 
-export default async function DropPage() {
+export default async function DropPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
+  const { id } = await searchParams;
   const g = await activeGraph();
-  const [d, p] = await Promise.all([drop(g), phase()]);
+  const [d, p, all] = await Promise.all([drop(g, id), phase(), drops()]);
   // One row per SKU. A restock adds a second PO to a SKU, so show the latest PO for it.
   const rows = await ro<Row>(
-    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style), (po:PO)-[:SUPPLIES]->(k)
+    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style)-[:IN_DROP]->(:Drop {id:$drop}), (po:PO)-[:SUPPLIES]->(k)
      WITH k, s, max(po.id) AS poId
      MATCH (po:PO {id: poId})-[:MADE_BY]->(sup:Supplier)
      OPTIONAL MATCH (s)-[:HAS_SAMPLE]->(sm:Sample {kind:'Fit'})
@@ -18,18 +20,26 @@ export default async function DropPage() {
             k.sold AS sold, k.onHand AS onHand, k.returns AS returns, k.returnReason AS reason,
             po.id AS po, sup.name AS supplier, po.eta AS eta, sm.note AS note
      ORDER BY style, colour, size DESC`,
-    {},
+    { drop: d.id },
     g,
   );
-  const live = p === "live";
+  const planning = d.status === "planning";
+  const live = p === "live" && !planning;
+  const styles = new Set(rows.map((r) => r.style)).size;
 
   return (
     <>
       <div>
-        <span className={`pill ${live ? "ok" : "risk"}`}><span className="dot" />{live ? "Live" : "Countdown"}</span>
+        <div className="row" style={{ justifyContent: "space-between" }}>
+          <span className={`pill ${live ? "ok" : "risk"}`}><span className="dot" />{planning ? "Planning" : live ? "Live" : "Countdown"}</span>
+          <span className="row" style={{ gap: 6 }}>
+            {all.map((x) => <Link key={x.id} href={`/drop?id=${x.id}`} className={`chip ${x.id === d.id ? "drop" : "msg"}`}>{x.name}</Link>)}
+            <Link href="/plan" className="btn fathom sm">Plan a collection</Link>
+          </span>
+        </div>
         <h1 className="h1" style={{ fontSize: 44, marginTop: 10 }}>{d.name}</h1>
         <p className="lede" style={{ fontSize: 15 }}>
-          Goes live {new Date(d.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · 3 styles · {rows.length} SKUs ·{" "}
+          Goes live {new Date(d.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {styles} styles · {rows.length} SKUs ·{" "}
           {rows.reduce((a, r) => a + r.planned, 0).toLocaleString("en-IN")} units. Each row is one SKU&apos;s lifeline: made → stock → sold → returned.
         </p>
       </div>

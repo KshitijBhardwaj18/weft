@@ -38,7 +38,8 @@ export default function Sidebar() {
 
       <div className="group">
         <div className="group-label">Collections</div>
-        {item("/drop", "Drops", I.drop, "Collections going live on a date", "Black Drop")}
+        {item("/drop", "Drops", I.drop, "Collections going live on a date")}
+        {item("/plan", "Plan a collection", I.scenario, "Start the next collection from what the last one taught")}
       </div>
       <div className="group">
         <div className="group-label">Supply</div>

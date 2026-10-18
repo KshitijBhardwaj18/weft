@@ -2,7 +2,7 @@ import { after } from "next/server";
 import { q } from "@/lib/graph";
 import { notifySupplier } from "@/lib/integrations/notify";
 import { canDecide } from "@/lib/roles";
-import { activeGraph, drop, restocks } from "@/lib/plan";
+import { activeGraph, drop, nextPoId, restocks } from "@/lib/plan";
 
 // An Owner/Manager decides on a call. Applying writes the decision into the plan.
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -34,8 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const r = (await restocks(10)).find((x) => x.id === call.about);
     const today = (await drop(g)).today;
     const eta = new Date(Date.parse(today) + (r?.leadDays ?? 14) * 86_400_000).toISOString().slice(0, 10);
-    const [{ next }] = await q<{ next: number }>("MATCH (po:PO) RETURN coalesce(max(toInteger(substring(po.id, 3))), 0) + 1 AS next", {}, g);
-    const poId = `PO-${String(next).padStart(3, "0")}`;
+    const poId = await nextPoId(g);
     // Price: what this SKU's latest PO was priced at. The supplier can change it on the PO later.
     const [last] = await q<{ unitPrice: number }>("MATCH (po:PO)-[:SUPPLIES]->(k:SKU {id:$sku}) RETURN po.unitPrice AS unitPrice ORDER BY po.id DESC LIMIT 1", { sku: call.about ?? "" }, g);
     await q(

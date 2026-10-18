@@ -1,7 +1,7 @@
 import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import CallCard from "@/components/CallCard";
-import { creators, daysBetween, drop, heatmap, openCalls, phase, pos, quietCheckIns, restocks, samplesApproved, supplierRisk, totals } from "@/lib/plan";
+import { creators, daysBetween, drop, drops, heatmap, openCalls, phase, pos, quietCheckIns, restocks, samplesApproved, supplierRisk, totals } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,10 @@ function cellStyle(pct: number, soldOut: boolean): React.CSSProperties {
 export default async function Today() {
   const p = await phase();
   const d = await drop();
-  const [calls, quiet, risk, allPos, samples] = await Promise.all([openCalls(), quietCheckIns(), supplierRisk(), pos(), samplesApproved()]);
+  const [calls, quiet, risk, everyPo, samples, all] = await Promise.all([openCalls(), quietCheckIns(), supplierRisk(), pos(), samplesApproved(), drops()]);
+  const allPos = everyPo.filter((x) => x.dropId === d.id);
+  const next = all.find((x) => x.status === "planning");
+  const size = all.find((x) => x.id === d.id);
   const live = p === "live";
   const days = daysBetween(d.today, d.date);
   const dayOfDrop = daysBetween(d.date, d.today);
@@ -57,7 +60,7 @@ export default async function Today() {
             </div>
           </div>
           <div style={{ flex: "1 1 380px", display: "flex", flexDirection: "column", gap: 8 }}>
-            <div className="sub" style={{ display: "flex", justifyContent: "space-between" }}><span>Sold through, by size</span><span>15 SKUs</span></div>
+            <div className="sub" style={{ display: "flex", justifyContent: "space-between" }}><span>Sold through, by size</span><span>{size?.skus} SKUs</span></div>
             <div className="heat">
               <span /><span className="sub" style={{ textAlign: "center" }}>S</span><span className="sub" style={{ textAlign: "center" }}>M</span><span className="sub" style={{ textAlign: "center" }}>L</span>
               {heat.map((r) => [
@@ -79,7 +82,7 @@ export default async function Today() {
               <span className="numeral">{days}</span>
               <span className="serif" style={{ fontSize: 30, lineHeight: 1.05, letterSpacing: -0.7 }}>days until<br />the <em>{d.name}</em></span>
             </div>
-            <div className="sub mono" style={{ fontSize: 13 }}>Goes live {fmt(d.date)} · 3 styles · 15 SKUs · 2,100 units</div>
+            <div className="sub mono" style={{ fontSize: 13 }}>Goes live {fmt(d.date)} · {size?.styles} styles · {size?.skus} SKUs · {size?.units.toLocaleString("en-IN")} units</div>
           </div>
           <div style={{ flex: "1 1 320px", display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
             <div className="sub">Drop readiness</div>
@@ -95,6 +98,12 @@ export default async function Today() {
         </section>
       )}
 
+      {next && (
+        <Link href={`/drop?id=${next.id}`} className="card" style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", textDecoration: "none", color: "inherit" }}>
+          <span><span className="muted" style={{ fontSize: 13 }}>Next collection · planning</span><br /><b style={{ fontSize: 18 }}>{next.name}</b> · launches {fmt(next.date)} · {next.styles} styles · {next.units.toLocaleString("en-IN")} units</span>
+          <span className="btn ghost sm">Open →</span>
+        </Link>
+      )}
       <div className="grid">
         <section className="card">
           <div className="card-head"><h2>Your call</h2><span className="muted" style={{ fontSize: 13 }}>{calls.length}</span></div>
