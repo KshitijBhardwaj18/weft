@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { openCalls, pos } from "@/lib/plan";
 import CallCard from "@/components/CallCard";
+import ReceiveButton from "@/components/ReceiveButton";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export default async function Production() {
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{p.label} · {p.qty}</div>
                   <Link href={`/supplier/${p.supplierId}`} className="chip vendor" style={{ alignSelf: "flex-start" }}>{p.supplier}</Link>
                   <div className="mono" style={{ fontSize: 12 }}><span className="muted">due</span> {fmt(p.eta)}</div>
+                  {s !== "Received" && <ReceiveButton poId={p.id} />}
                 </div>
               ))}
             </div>

@@ -82,10 +82,23 @@ export async function restocks(limit = 3): Promise<Restock[]> {
     {},
     g,
   );
+  // Incoming: POs not yet received, split evenly across the SKUs each one supplies.
+  const incoming = new Map(
+    (
+      await ro<{ id: string; incoming: number }>(
+        `MATCH (po:PO)-[:SUPPLIES]->(k:SKU) WHERE po.stage <> 'Received'
+         WITH po, collect(k) AS ks
+         UNWIND ks AS k
+         RETURN k.id AS id, sum(toFloat(po.qty) / size(ks)) AS incoming`,
+        {},
+        g,
+      )
+    ).map((r) => [r.id, r.incoming]),
+  );
   return rows
     .map((r) => {
       const rate = r.sold / daysLive;
-      const qty = Math.ceil(Math.max(0, rate * r.leadDays - r.onHand) / 10) * 10;
+      const qty = Math.ceil(Math.max(0, rate * r.leadDays - r.onHand - (incoming.get(r.id) ?? 0)) / 10) * 10;
       return {
         id: r.id,
         label: `${r.style.replace(/^(Core|Sculpt|Everyday) /, "")} · ${r.colour} · ${r.size}`,
@@ -189,6 +202,18 @@ export async function supplierRisk(): Promise<{ name: string; score: number; sku
     {},
     g,
   );
+}
+
+/** Styles with at least one approved sample, out of all styles. */
+export async function samplesApproved(): Promise<{ approved: number; styles: number }> {
+  const [r] = await ro<{ approved: number; styles: number }>(
+    `MATCH (s:Style) OPTIONAL MATCH (s)-[:HAS_SAMPLE]->(x:Sample {status:'approved'})
+     WITH s, count(x) AS n
+     RETURN count(CASE WHEN n > 0 THEN 1 END) AS approved, count(s) AS styles`,
+    {},
+    await activeGraph(),
+  );
+  return r;
 }
 
 export type Activity = { at: string; who: string; text: string };

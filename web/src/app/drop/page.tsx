@@ -8,8 +8,11 @@ type Row = { id: string; code: string; style: string; colour: string; size: stri
 export default async function DropPage() {
   const g = await activeGraph();
   const [d, p] = await Promise.all([drop(g), phase()]);
+  // One row per SKU. A restock adds a second PO to a SKU, so show the latest PO for it.
   const rows = await ro<Row>(
-    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style), (po:PO)-[:SUPPLIES]->(k), (po)-[:MADE_BY]->(sup:Supplier)
+    `MATCH (k:SKU)-[:OF_STYLE]->(s:Style), (po:PO)-[:SUPPLIES]->(k)
+     WITH k, s, max(po.id) AS poId
+     MATCH (po:PO {id: poId})-[:MADE_BY]->(sup:Supplier)
      OPTIONAL MATCH (s)-[:HAS_SAMPLE]->(sm:Sample {kind:'Fit'})
      RETURN k.id AS id, k.code AS code, s.name AS style, k.colour AS colour, k.size AS size, k.planned AS planned,
             k.sold AS sold, k.onHand AS onHand, k.returns AS returns, k.returnReason AS reason,

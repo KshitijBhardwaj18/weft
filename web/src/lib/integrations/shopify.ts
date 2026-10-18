@@ -29,8 +29,8 @@ export type RestRefund = {
   note: string | null;
   refund_line_items: { quantity: number; line_item: { sku: string | null } | null }[];
 };
-// REST inventory_levels/update payload (sku is only present if the sender adds it).
-export type RestInventoryLevel = { sku?: string | null; available?: number | null };
+// REST inventory_levels/update payload: Shopify sends inventory_item_id, not the SKU.
+export type RestInventoryLevel = { inventory_item_id?: number | null; sku?: string | null; available?: number | null };
 
 export type SyncSummary = { orders: number; skusUpdated: number; creatorsUpdated: number; unmatchedSkus: string[] };
 
@@ -287,11 +287,21 @@ export async function applyRefundWebhook(refund: RestRefund): Promise<void> {
   );
 }
 
-// Sets onHand from an inventory webhook; returns false when the payload has no SKU to match.
+// Sets onHand from an inventory webhook; returns false when the SKU cannot be found.
 export async function applyInventoryWebhook(level: RestInventoryLevel): Promise<boolean> {
-  if (!level.sku || level.available == null) return false;
-  await q("MATCH (k:SKU {code: $sku}) SET k.onHand = $onHand", { sku: level.sku, onHand: level.available }, await activeGraph());
+  if (level.available == null) return false;
+  const sku = level.sku ?? (level.inventory_item_id ? await skuOfInventoryItem(level.inventory_item_id) : null);
+  if (!sku) return false;
+  await q("MATCH (k:SKU {code: $sku}) SET k.onHand = $onHand", { sku, onHand: level.available }, await activeGraph());
   return true;
+}
+
+async function skuOfInventoryItem(id: number): Promise<string | null> {
+  const data = await shopifyGraphQL<{ inventoryItem: { sku: string | null } | null }>(
+    "query($id: ID!) { inventoryItem(id: $id) { sku } }",
+    { id: `gid://shopify/InventoryItem/${id}` },
+  );
+  return data.inventoryItem?.sku ?? null;
 }
 
 // Checks Shopify's base64 HMAC-SHA256 of the raw body against the webhook secret.

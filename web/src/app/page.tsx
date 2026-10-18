@@ -1,7 +1,7 @@
 import Link from "next/link";
 import TopBar from "@/components/TopBar";
 import CallCard from "@/components/CallCard";
-import { creators, daysBetween, drop, heatmap, openCalls, phase, pos, quietCheckIns, restocks, supplierRisk, totals } from "@/lib/plan";
+import { creators, daysBetween, drop, heatmap, openCalls, phase, pos, quietCheckIns, restocks, samplesApproved, supplierRisk, totals } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ function cellStyle(pct: number, soldOut: boolean): React.CSSProperties {
 export default async function Today() {
   const p = await phase();
   const d = await drop();
-  const [calls, quiet, risk, allPos] = await Promise.all([openCalls(), quietCheckIns(), supplierRisk(), pos()]);
+  const [calls, quiet, risk, allPos, samples] = await Promise.all([openCalls(), quietCheckIns(), supplierRisk(), pos(), samplesApproved()]);
   const live = p === "live";
   const days = daysBetween(d.today, d.date);
   const dayOfDrop = daysBetween(d.date, d.today);
@@ -84,7 +84,7 @@ export default async function Today() {
           <div style={{ flex: "1 1 320px", display: "flex", flexDirection: "column", gap: 10, fontSize: 14 }}>
             <div className="sub">Drop readiness</div>
             <div className="kv"><span>Factory orders on time</span><span className="mono">{onTrack} of {allPos.length}</span></div>
-            <div className="kv"><span>Samples approved</span><span className="mono">3 of 3 styles</span></div>
+            <div className="kv"><span>Samples approved</span><span className="mono">{samples.approved} of {samples.styles} styles</span></div>
             <div className="kv"><span>Creators booked</span><span className="mono">3 · post 25 Nov</span></div>
             <div className="kv"><span>Suppliers gone quiet</span><span className="mono">{quiet.length}</span></div>
             <div className="row" style={{ marginTop: 6 }}>
