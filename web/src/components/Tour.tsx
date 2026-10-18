@@ -3,16 +3,15 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// A guided walk through the major features. Each step opens a page and says what to try there.
-const STEPS: { path: string; title: string; body: string; graph: string }[] = [
-  { path: "/", title: "Today, 13 days to the Black Drop", body: "One live plan for a fitness-wear drop: 3 styles, 15 SKUs, 2,100 units, 5 factory orders, 3 creators. Your call lists what the AI teammates need you to decide.", graph: "Single points of failure is PageRank over MADE_BY edges (algo.pageRank)." },
-  { path: "/supplier/sri", title: "Make: the supplier answers a check-in", body: "This is Murugan's view at Sri Lakshmi Knits. On Shuttle's check-in, click Delayed → pick a date → Send. Or type in the chat: \"Fabric delayed, coming 28th\".", graph: "The answer becomes a CheckIn fact and a Call node linked back to it." },
-  { path: "/", title: "The delay call, with its impact", body: "Shuttle raised a call: PO-014 lands 5 Dec, after the 1 Dec drop, and breaks 3 creator posts. Click Scenario on that call.", graph: "Impact is one multi-hop query: PO → SKU → Style → Drop ← CreatorPost ← Creator." },
-  { path: "/scenarios?po=PO-014", title: "Test it in a scenario", body: "Move PO-014 to Kavya Garments → Create scenario. Compare reality with the copy, then Apply to plan.", graph: "A scenario is a full GRAPH.COPY of the plan; apply copies it back and records a Decision." },
-  { path: "/", title: "Ask a teammate, and see why", body: "Press ⌘J (or click the Ask bar) and ask \"Why did we pick Sri Lakshmi in the first place?\". Open See why under the answer.", graph: "Teammates run read-only Cypher through GRAPH.RO_QUERY; every query is listed." },
-  { path: "/map?search=olive", title: "The Brand map", body: "Everything in the brand as one graph. Search for olive to highlight every match.", graph: "Full-text index via db.idx.fulltext.queryNodes; range indexes on every id." },
-  { path: "/", title: "Sell: switch to Live, day 9", body: "Click Live · 10 Dec at the top. 62% sold; black leggings M sold out on day 4. In Your call, click Approve PO on Pattern's restock.", graph: "Sell-through, revenue and restocks are aggregations over SKU nodes in the weft_live graph." },
-  { path: "/production", title: "Restock to receipt", body: "The approved restock is a new PO in Fabric. Click Mark received: its quantity goes onto stock, and Restock now stops suggesting it.", graph: "Restock nets out POs not yet received; receipt adds the PO's qty to SKU.onHand." },
+// A short guided walk through the product. Each step opens a page and says what to try there.
+const STEPS: { path: string; title: string; body: string; how: string }[] = [
+  { path: "/", title: "This is Today", body: "Your brand at a glance: what needs you, Weft's morning brief, and how the next launch is going.", how: "Single points of failure come from PageRank over the graph's supplier links." },
+  { path: "/supplier/sri", title: "A factory says it's late", body: "This is what your supplier sees. On the check-in, click Delayed → pick a date → Send.", how: "The answer is saved on the graph, linked to the factory order it's about." },
+  { path: "/", title: "Weft shows what breaks", body: "A new call: the order now lands after launch, and 3 creator posts promising the date break. Click Scenario on it.", how: "One graph query walks from the order to every post that promised its date." },
+  { path: "/scenarios?po=PO-014", title: "Try a fix safely", body: "Move the order to another factory in a private copy. Compare the two outcomes, then Apply to plan.", how: "A scenario is a full copy of the plan (FalkorDB GRAPH.COPY)." },
+  { path: "/chat/agent-shuttle", title: "Talk to your teammates", body: "Ask Shuttle anything about production. In any chat, @weft, @shuttle or @pattern answers in place.", how: "Teammates read the graph with read-only queries; See why shows them." },
+  { path: "/", title: "Launch, and sales", body: "Click Live · 10 Dec at the top. See what sold by size, then click Approve PO on Pattern's restock.", how: "Restock = sell rate × factory lead time − stock − what's already on order." },
+  { path: "/plan", title: "Plan the next collection", body: "Weft starts from what actually sold. Adjust anything and create it: the orders go to your factories.", how: "Styles, products and orders are created as new connected nodes." },
 ];
 
 export default function Tour() {
@@ -20,6 +19,7 @@ export default function Tour() {
   const pathname = usePathname();
   const params = useSearchParams();
   const [step, setStep] = useState<number | null>(null);
+  const [small, setSmall] = useState(false);
 
   useEffect(() => {
     if (params.get("tour") === "1") localStorage.setItem("weft_tour", "0");
@@ -33,18 +33,26 @@ export default function Tour() {
     if (n >= STEPS.length || n < 0) { localStorage.removeItem("weft_tour"); setStep(null); return; }
     localStorage.setItem("weft_tour", String(n));
     setStep(n);
+    setSmall(false);
     if (STEPS[n].path.split("?")[0] !== pathname || STEPS[n].path.includes("?")) router.push(STEPS[n].path);
   };
   const reset = async () => { await fetch("/api/demo/reset", { method: "POST" }); localStorage.setItem("weft_tour", "0"); setStep(0); router.push("/"); router.refresh(); };
 
+  if (small) return <button className="tour-pill" onClick={() => setSmall(false)}>Tour · {step + 1} of {STEPS.length} · {s.title}</button>;
   return (
     <div className="tour" role="dialog" aria-label="Guided tour">
-      <div className="tour-head"><span>Guided tour · {step + 1} of {STEPS.length}</span><button className="btn quiet sm" onClick={() => go(STEPS.length)} aria-label="Close tour">Close</button></div>
+      <div className="tour-head">
+        <span>Tour · {step + 1} of {STEPS.length}</span>
+        <span className="row" style={{ gap: 2 }}>
+          <button className="btn quiet sm" onClick={() => setSmall(true)} aria-label="Minimise tour">Hide</button>
+          <button className="btn quiet sm" onClick={() => go(STEPS.length)} aria-label="Close tour">Close</button>
+        </span>
+      </div>
       <div className="tour-title">{s.title}</div>
       <div className="tour-body">{s.body}</div>
-      <div className="tour-graph"><b>FalkorDB</b> {s.graph}</div>
+      <details className="tour-graph"><summary>Under the hood</summary>{s.how}</details>
       <div className="row" style={{ justifyContent: "space-between" }}>
-        <button className="btn quiet sm" onClick={reset}>Reset demo data</button>
+        <button className="btn quiet sm" onClick={reset}>Start over</button>
         <span className="row" style={{ gap: 6 }}>
           {step > 0 && <button className="btn ghost sm" onClick={() => go(step - 1)}>Back</button>}
           <button className="btn fathom sm" onClick={() => go(step + 1)}>{step === STEPS.length - 1 ? "Finish" : "Next"}</button>

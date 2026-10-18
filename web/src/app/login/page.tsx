@@ -13,7 +13,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         <div className="card" style={{ padding: 28, gap: 16 }}>
           <div>
             <h1 className="h1" style={{ fontSize: 38 }}>Sign in</h1>
-            <p className="lede" style={{ fontSize: 15 }}>The Black Drop workspace, seeded with demo data.</p>
+            <p className="lede" style={{ fontSize: 15 }}>Explore Weft with an example brand: a fitness-wear label two weeks from its next launch. You get your own private copy.</p>
           </div>
           <div style={{ background: "var(--vendor-soft)", color: "var(--fathom)", borderRadius: 12, padding: "12px 14px", fontSize: 14, lineHeight: 1.6 }}>
             <b>Demo credentials</b><br />
@@ -26,10 +26,10 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
             <label htmlFor="password" className="muted" style={{ fontSize: 13 }}>Password</label>
             <input id="password" name="password" type="password" className="input" defaultValue={DEMO_PASSWORD} required />
             {error && <div style={{ color: "var(--pulse)", fontSize: 13 }}>That isn&apos;t the demo login. Use the credentials above.</div>}
-            <button className="btn fathom lg" style={{ justifyContent: "center", marginTop: 6 }}>Sign in and start the tour</button>
+            <button className="btn fathom lg" style={{ justifyContent: "center", marginTop: 6 }}>Sign in and take the tour</button>
           </form>
         </div>
-        <p className="muted" style={{ fontSize: 13, textAlign: "center" }}>You&apos;ll sign in as Kshitij, the Owner. A guided tour walks through the major features.</p>
+        <p className="muted" style={{ fontSize: 13, textAlign: "center" }}>You&apos;ll sign in as Kshitij, the founder. A short tour shows you around.</p>
       </div>
     </div>
   );
