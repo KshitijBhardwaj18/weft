@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { shopifyConfigured, shopifyStore, syncShop } from "@/lib/integrations/shopify";
+import { viewer } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 // Pulls Shopify orders and inventory into the plan graph.
 export async function POST(req: Request) {
+  // This path is public for webhooks; a sync is a team action.
+  if (!(await viewer()).team) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
   if (!shopifyConfigured()) {
     return NextResponse.json({ error: "Set SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_TOKEN in web/.env.local" }, { status: 400 });
   }

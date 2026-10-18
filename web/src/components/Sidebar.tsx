@@ -49,6 +49,7 @@ export default function Sidebar() {
       <div className="group">
         <div className="group-label">Commerce</div>
         {item("/drop#sales", "Sales", I.sales, "What sold, which sizes, which creators")}
+        {item("/integrations", "Shop & channels", I.supplier, "Shopify, email and WhatsApp")}
       </div>
       <div className="group">
         <div className="group-label">Strategy</div>
