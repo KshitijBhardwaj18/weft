@@ -13,7 +13,19 @@ A D2C product is planned, made, sold and restocked, and each stage lives in a di
 
 ### Deployment
 
-The public URL is a Cloudflare Worker ([deploy/cloudflare](deploy/cloudflare)) on a custom domain. It proxies to the Next.js server, which runs with its own FalkorDB instance seeded with the demo data, reached through a Cloudflare Tunnel. The Worker keeps the public URL stable; `ORIGIN` in `wrangler.jsonc` points it at the app server.
+Weft runs on **Cloudflare Workers** (free plan) through the [OpenNext](https://opennext.js.org/cloudflare) adapter, with the graph on **FalkorDB Cloud**. Each demo visitor gets a private workspace: signing in copies the template graphs with `GRAPH.COPY`, so visitors never see each other's changes, and *Start over* recopies them.
+
+```bash
+cd web
+FALKORDB_URL='falkor://USER:PASSWORD@HOST:PORT' node scripts/seed.mjs   # demo graphs + visitor templates (URL-encode @ in the password as %40)
+npx wrangler secret put FALKORDB_URL        # same URL
+npx wrangler secret put ANTHROPIC_API_KEY
+npx wrangler secret put SESSION_SECRET      # signs supplier links; any long random string
+pnpm deploy                                 # preview Worker: weft-next.<account>.workers.dev
+pnpm deploy:production                      # the weft.kshitijbhardwaj.space Worker (set the same secrets with --env production first)
+```
+
+`pnpm preview` runs the Workers build locally (reads `web/.dev.vars`).
 
 ## Tracks
 
