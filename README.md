@@ -25,11 +25,28 @@ Weft is entered in three tracks of the FalkorDB Graph Hacks hackathon.
 The plan is the source of truth. The app reads and writes one live graph per drop (`weft`) directly. There are four ways it stays current:
 
 1. **Team in the UI.** *Your call* on Today applies or ignores a call from a teammate. Applying writes the change and a `Decision` node that records who made it.
-2. **Supplier check-ins.** Shuttle asks a supplier a structured question before something is due, answered in one tap at `/supplier/sri`. A "delayed" answer with a new date raises a delay call and shows its impact. Check-ins are not delivered over WhatsApp or email yet.
-3. **Chat.** *Ask* (⌘J) answers questions from the graph and shows every query it ran under *See why*. It is read-only, so it does not yet propose plan changes.
+2. **Supplier check-ins.** Shuttle asks a supplier a structured question before something is due, answered in one tap in the supplier's view (`/supplier/sri`), by email (Resend) or by WhatsApp buttons (Cloud API). A "delayed" answer with a new date raises a delay call and shows its impact.
+3. **Chat.** Real-time conversations with suppliers, the team and the AI teammates. Shuttle reads every supplier and team message and proposes plan updates: a forward stage move ("cutting done for PO-017") applies on its own and is recorded as a fact against the message; a date change ("fabric delayed, coming 28th") becomes a call with its impact. Mention `@weft`, `@shuttle` or `@pattern` to ask in place, or open a teammate's own chat. *Ask* (⌘J) is available on every screen.
 4. **Calendar and gone quiet.** A check-in with no answer after its due date shows as *gone quiet*. The demo seeds one: the olive lab dip from Ananya Fabrics on PO-019. There is no calendar connection yet.
 
-Shopify is not connected. Sales are seeded into the graph as sold counts on each SKU.
+## Conversations
+
+The sidebar groups conversations three ways:
+
+- **Suppliers.** One chat per supplier (Sri Lakshmi Knits, Kavya Garments, Ananya Fabrics). The supplier sees only their chat, their POs and check-ins (`/supplier/<id>`); the team sees the same chat with a PO panel (`/chat/sup-<id>`). Inbound WhatsApp messages land here.
+- **Team.** `#ops` and `#marketing`.
+- **AI teammates.** A chat with Weft (chief of staff), Shuttle (production lead) and Pattern (sales analyst). Each answers from the graph with *See why*.
+
+Messages are graph nodes, `(:Message)-[:IN]->(:Channel)`, so teammates can read them and every fact or call links back to the message it came from. New messages reach open clients over Server-Sent Events. Roles are enforced on every decision: only an Owner or Manager can accept a call, approve a PO or apply a scenario (switch who you're acting as at the bottom of the sidebar; sign-in comes next).
+
+## Integrations
+
+Each integration is optional and skips cleanly when its keys are unset (see `web/.env.example`).
+
+- **Shopify** (`src/lib/integrations/shopify.ts`): `POST /api/integrations/shopify/sync` pulls orders, refunds, discount codes and inventory through the Admin GraphQL API and writes sold, returns, on-hand and creator attribution onto the SKU and Creator nodes. `POST /api/integrations/shopify/webhook` verifies the HMAC and applies `orders/create` and `refunds/create` incrementally. The demo uses seeded sales so it runs without a store.
+- **Resend** (`src/lib/integrations/email.ts`): PO and check-in emails to the supplier contact, with one-tap links.
+- **WhatsApp Cloud API** (`src/lib/integrations/whatsapp.ts`, `/api/integrations/whatsapp/webhook`): check-ins as reply buttons, POs as an approved template, and inbound supplier messages posted into the supplier chat, where Shuttle reads them.
+- Suppliers are notified when a call is applied (follow-ups), a restock PO is approved, or a scenario moves a PO to them.
 
 **Act 1, Countdown (18 Nov).** Shuttle has an open check-in on PO-014, the leggings fabric from Sri Lakshmi Knits. Sri Lakshmi says the fabric is delayed. Weft turns that into a delay call: the drop is at risk, and the creator posts from Ria, Dev and Tara that promise 1 Dec are broken. In *Scenarios*, move PO-014 to Kavya Garments. A private copy of the plan is created, and the PO is re-dated from Kavya's 10-day lead time, so it lands before the drop. Compare the two outcomes, then *Apply to plan*. The scenario replaces the plan and a decision is recorded. The move costs 600 units at +₹20 a piece, or ₹12,000.
 
@@ -58,6 +75,9 @@ graph LR
   Decision -->|ABOUT| Supplier
   Person -->|DECIDED| Decision
   Decision -->|SOURCED_FROM| Message
+  Message -->|IN| Channel
+  Fact -->|FROM| Message
+  Call -->|SOURCED_FROM| Message
   Drop -->|SOURCED_FROM| Message
   CreatorPost -->|SOURCED_FROM| Message
 ```
@@ -266,7 +286,8 @@ Notes:
 - `pnpm seed` rebuilds `weft` and `weft_live` and resets the demo to Countdown. Run it again at any time to reset the demo.
 - The demo clock is the **Countdown · 18 Nov** / **Live · 10 Dec** toggle at the top of Today.
 - *Ask* opens with ⌘J. It needs `ANTHROPIC_API_KEY`. The other pages work without it.
-- The supplier view for Sri Lakshmi Knits is at `/supplier/sri`.
+- The supplier view for Sri Lakshmi Knits is at `/supplier/sri`; the team's view of the same chat is at `/chat/sup-sri`.
+- Try typing as Murugan in the supplier view: "Cutting done for PO-017" or "Fabric delayed, coming 28th".
 - The FalkorDB Browser, to inspect the graphs directly, is at http://localhost:3001.
 
 ## Project structure
@@ -277,12 +298,15 @@ web/
   src/app/
     page.tsx                Today (/)
     production/             Production: every PO and its check-ins
-    supplier/[id]/          supplier view for check-ins (/supplier/sri)
+    supplier/[id]/          supplier view: POs, check-ins and chat (/supplier/sri)
+    chat/[channel]/         conversations: suppliers, team, AI teammates
     drop/                   drop view
     scenarios/              scenarios: create, compare, apply
     map/                    Brand map with See why paths
     api/
       ask/                  Ask: teammate tool loop over run_cypher
+      chat/[channel]/       post a message; stream/ pushes new messages (SSE)
+      integrations/         shopify/sync, shopify/webhook, whatsapp/webhook
       calls/[id]/           apply or ignore a call
       checkins/[id]/        answer a check-in (yes or delayed)
       scenarios/            create, apply, discard a scenario
@@ -291,6 +315,12 @@ web/
     graph.ts                FalkorDB client, read-only queries, GRAPH.COPY
     plan.ts                 plan queries: heatmap, totals, restocks, PageRank, impact
     scenarios.ts            scenario create, compare, apply, discard
+    chat.ts                 channels, messages, real-time bus
+    agent.ts                teammates: Claude over read-only Cypher
+    proposals.ts            teammates propose plan updates from chat
+    checkins.ts             answer check-ins, raise delay calls
+    roles.ts                Owner / Manager / Member
+    integrations/           shopify, email (Resend), whatsapp, notify
   src/components/           AskPanel, BrandMap, CallCard, CheckInCard, ScenarioActions, Sidebar, TopBar
 inter/
   product.md                product definition: problem, kernel, glossary (written before building)
@@ -298,13 +328,13 @@ inter/
 docker-compose.yml          FalkorDB and its browser
 ```
 
-## What's next
+## Roadmap
 
-- **Shopify connector**: orders, inventory and discount codes flow into the graph in place of seeded sales.
-- **Resend emails** for supplier check-ins, so a supplier can answer by email.
-- **WhatsApp bridge** for supplier chats, with check-in buttons as quick replies.
-- **Vector index** for semantic search over messages, alongside the full-text index.
-- **More teammates** on the same graph: a brand guardian, a finance teammate and a customer support teammate.
+- Sign-in with email magic links (Resend), replacing the acting-as switcher.
+- Shopify: inventory-item lookups for `inventory_levels/update`, webhook de-duplication.
+- Scenarios that simulate sales, stock and cash, not only dates and suppliers.
+- Vector index for semantic search over messages, alongside the full-text index.
+- More teammates on the same graph: brand guardian, finance, customer support.
 
 ## Built with AI assistance
 

@@ -10,11 +10,13 @@
 
 ## Act 1 — Countdown, 18 Nov (2 min)
 1. **Today.** "Thirteen days until the Black Drop: 3 styles, 15 SKUs, 2,100 units. One supplier has gone quiet." Point at **Single points of failure**: "PageRank over the supply graph: Sri Lakshmi Knits carries 9 SKUs."
-2. **Switch to the supplier tab** (`/supplier/sri`). "This is what Murugan at the factory sees: only his POs and Shuttle's check-in." Click **Delayed → pick a date**, keep **28 Nov**, **Send**.
-3. **Back to Today, refresh.** Read the new call: "Shuttle didn't change the plan. It walked the graph: PO-014 → SKUs → Core Leggings → Black Drop ← creator posts. It lands around 5 Dec, 4 days late, and breaks 3 creator posts announcing 1 December."
+2. **Switch to the supplier tab** (`/supplier/sri`). "This is what Murugan at the factory sees: only his POs, Shuttle's check-in and his chat with us." Type as Murugan in the chat: **"Cutting done for the olive leggings PO-017"** → "Shuttle reads it and moves PO-017 to Stitching on its own, quoting the message." Then type **"Sir fabric delayed, coming 28th. Mill problem."** (or tap **Delayed → 28 Nov** on the check-in).
+3. **Open the team's view** (sidebar → Conversations → Suppliers → Sri Lakshmi Knits): the messages arrived live, with Shuttle's "your call" card. **Then Today.** Read the new call: "Shuttle didn't change the plan. It walked the graph: PO-014 → SKUs → Core Leggings → Black Drop ← creator posts. It lands around 5 Dec, 4 days late, and breaks 3 creator posts announcing 1 December."
 4. Click **Scenario** on that call. Pick **PO-014 → Kavya Garments**, **Create scenario**. "This is GRAPH.COPY: a full private copy of the plan, with the change made only in the copy." Read the comparison: 5 Dec vs 28 Nov, Late vs On time, 3 broken posts vs all kept, +₹12,000.
 5. **Apply to plan → Yes.** "The scenario graph is copied back over the plan and the decision is recorded." Production opens: PO-014 is now at Kavya Garments, due 28 Nov.
 6. Press **⌘J**, ask **"Why did we move PO-014 to Kavya?"** then **"Why did we pick Sri Lakshmi in the first place?"** Open **See why**: "every Cypher query the teammate ran, and the messages it traced back to." Click **Show on Brand map**.
+
+6b. **Conversations → AI teammates → Shuttle**: "Which POs could still put the Black Drop at risk?" — the answer arrives in the chat with See why.
 
 ## Act 2 — Live, day 9 (1 min 20 s)
 7. Back on **Today**, click **Live · 10 Dec** on the demo clock. "Nine days after launch." Read: 62% sold, ₹27.4L, the heatmap: "black leggings M sold out on day 4, olive tank is crawling."
