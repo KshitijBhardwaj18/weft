@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Weft blog illustrations</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:#F4F3EC;--surface:#FFFEF8;--raised:#ECEBE1;--ink:#1A1A1A;--ink-2:#5F5E5A;--line:rgba(26,26,26,.1);--line-2:rgba(26,26,26,.18);
+  --fathom:#034F46;--fathom-ink:#CFE6E1;--cream:#FFFFEB;--dawn:#F0D7FF;--dawn-ink:#4A1F70;--glow:#E08A1E;--glow-soft:#FCEBCF;--glow-ink:#6B4300;
+  --flare-soft:#FFDDD3;--flare-ink:#8A2A12;--signal-soft:#FFE3F8;--signal-ink:#8A2C74;--pulse:#7F1C34;--late-soft:#F8E4E4;--hot:#D8452A;
+  --ok-soft:#CEF5CA;--ok-ink:#114E0B;--vendor-soft:#D5EBE6;--style-soft:#FFE7C7;--style-ink:#6B3A00;--po-soft:#E4E4D0;--po-ink:#33331F;
+  --serif:"EB Garamond",Georgia,serif;--sans:Figtree,system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#ccc;font-family:var(--sans);color:var(--ink)}
+.g{width:1600px;height:900px;background:var(--canvas);position:relative;overflow:hidden;margin:0 0 40px;padding:64px 72px}
+.g.dark{background:var(--fathom);color:var(--cream)}
+.eb{font:700 15px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--fathom)}
+.dark .eb{color:var(--fathom-ink)}
+.h{font:400 58px/1.04 var(--serif);letter-spacing:-1.4px;margin:12px 0 0;max-width:1150px}
+.h em{color:var(--fathom);font-style:italic}
+.dark .h em{color:#FFD99A}
+.sub{font:500 20px/1.5 var(--sans);color:var(--ink-2);margin-top:14px;max-width:900px}
+.dark .sub{color:var(--fathom-ink)}
+.foot{position:absolute;left:72px;bottom:40px;font:500 15px var(--sans);color:var(--ink-2)}
+.dark .foot{color:var(--fathom-ink)}
+.mark{position:absolute;right:72px;bottom:36px;font:500 24px var(--serif);display:flex;gap:10px;align-items:center;color:var(--ink)}
+.dark .mark{color:var(--cream)}
+.mark i{font-style:normal;width:28px;height:28px;border-radius:8px;background:var(--fathom);color:var(--cream);display:grid;place-items:center;font:700 14px var(--sans)}
+.dark .mark i{background:var(--cream);color:var(--fathom)}
+svg text{font-family:var(--sans)}
+.mono{font-family:var(--mono)}
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:0 14px 40px rgba(26,26,26,.08)}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:9px;padding:4px 10px;font:600 14px var(--sans)}
+</style>
+</head>
+<body>
+
+<!-- 1. COVER -->
+<section class="g dark" id="cover">
+  <div style="position:absolute;left:72px;top:150px;width:700px;z-index:2">
+    <div class="eb">The company harness for D2C brands</div>
+    <div class="h" style="font-size:86px;line-height:.98;letter-spacing:-2.6px">Run your whole brand on <em>one live plan.</em></div>
+    <div class="sub" style="font-size:22px;max-width:620px;margin-top:24px">Plan, make, launch, sell and restock in one place, with AI teammates that chase every update and show what each change breaks.</div>
+  </div>
+  <svg id="cover-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 2. THE ROUTER -->
+<section class="g" id="router">
+  <div class="eb">The problem</div>
+  <div class="h">Every tool sees one part of the brand. <em>The founder carries the rest.</em></div>
+  <svg id="router-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 3. THREE MOMENTS -->
+<section class="g" id="moments">
+  <div class="eb">Where brands lose money</div>
+  <div class="h">Three moments. Each one is a <em>join</em> nobody was watching.</div>
+  <svg id="moments-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 4. THE GRAPH -->
+<section class="g" id="graph">
+  <div class="eb">The idea</div>
+  <div class="h">Put the whole brand on <em>one graph</em>, and every fact keeps its connections.</div>
+  <svg id="graph-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 5. TEAMMATES -->
+<section class="g" id="teammates">
+  <div class="eb">Who works on the graph</div>
+  <div class="h">Three AI teammates read the plan. <em>You make the call.</em></div>
+  <div style="position:absolute;left:72px;right:72px;top:290px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px">
+    <div class="card" style="padding:30px;background:var(--dawn);border:0">
+      <div style="display:flex;align-items:center;gap:14px"><span style="width:58px;height:58px;border-radius:16px;background:var(--dawn-ink);color:var(--dawn);display:grid;place-items:center;font:400 34px var(--serif)">W</span><div><div style="font:400 40px var(--serif);color:var(--dawn-ink)">Weft</div><div style="font:700 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--dawn-ink);opacity:.75">Chief of staff</div></div></div>
+      <div style="font:500 19px/1.5 var(--sans);color:var(--dawn-ink);margin-top:20px">Answers anything about the drop, routes questions to the right teammate, and writes the morning brief.</div>
+      <div style="margin-top:22px;background:rgba(255,255,255,.55);border-radius:14px;padding:14px 16px;font:500 15px/1.5 var(--mono);color:var(--dawn-ink)">"Why did we pick Sri Lakshmi?"</div>
+    </div>
+    <div class="card" style="padding:30px;background:var(--vendor-soft);border:0">
+      <div style="display:flex;align-items:center;gap:14px"><span style="width:58px;height:58px;border-radius:16px;background:var(--fathom);color:var(--cream);display:grid;place-items:center;font:400 34px var(--serif)">S</span><div><div style="font:400 40px var(--serif);color:var(--fathom)">Shuttle</div><div style="font:700 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--fathom);opacity:.75">Production lead</div></div></div>
+      <div style="font:500 19px/1.5 var(--sans);color:var(--fathom);margin-top:20px">Checks in with suppliers before dates are due, reads their chat, and turns a slip into a call with its impact.</div>
+      <div style="margin-top:22px;background:rgba(255,255,255,.55);border-radius:14px;padding:14px 16px;font:500 15px/1.5 var(--mono);color:var(--fathom)">"Is the fabric in for PO-014?"</div>
+    </div>
+    <div class="card" style="padding:30px;background:var(--glow-soft);border:0">
+      <div style="display:flex;align-items:center;gap:14px"><span style="width:58px;height:58px;border-radius:16px;background:var(--glow-ink);color:var(--glow-soft);display:grid;place-items:center;font:400 34px var(--serif)">P</span><div><div style="font:400 40px var(--serif);color:var(--glow-ink)">Pattern</div><div style="font:700 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--glow-ink);opacity:.75">Sales analyst</div></div></div>
+      <div style="font:500 19px/1.5 var(--sans);color:var(--glow-ink);margin-top:20px">Watches sell-through, spots sell-outs, drafts restocks from lead times, and ranks creators by orders.</div>
+      <div style="margin-top:22px;background:rgba(255,255,255,.55);border-radius:14px;padding:14px 16px;font:500 15px/1.5 var(--mono);color:var(--glow-ink)">"Restock 340 black leggings M."</div>
+    </div>
+  </div>
+  <div style="position:absolute;left:72px;right:72px;top:700px;display:flex;gap:16px;align-items:center;font:600 18px var(--sans)">
+    <span class="chip" style="background:var(--ink);color:var(--cream);font-size:16px;padding:10px 16px">run_cypher</span>
+    <span style="color:var(--ink-2)">→</span>
+    <span class="chip" style="background:var(--surface);border:1px solid var(--line-2);font-size:16px;padding:10px 16px">GRAPH.RO_QUERY · read-only</span>
+    <span style="color:var(--ink-2)">→</span>
+    <span class="chip" style="background:var(--glow-soft);color:var(--glow-ink);font-size:16px;padding:10px 16px">a call, with its impact</span>
+    <span style="color:var(--ink-2)">→</span>
+    <span class="chip" style="background:var(--fathom);color:var(--cream);font-size:16px;padding:10px 16px">Owner or Manager decides</span>
+    <span style="color:var(--ink-2)">→</span>
+    <span class="chip" style="background:#F3D9DF;color:var(--pulse);font-size:16px;padding:10px 16px">Decision, with its source</span>
+  </div>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 6. DELAY WALK -->
+<section class="g" id="walk">
+  <div class="eb">Moment one, replayed</div>
+  <div class="h">A one-line message becomes a <em>five-hop walk</em> through the plan.</div>
+  <svg id="walk-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 7. TWO FUTURES -->
+<section class="g" id="futures">
+  <div class="eb">Test it before you change it</div>
+  <div class="h">Copy the whole plan. Change the copy. <em>Compare two futures.</em></div>
+  <svg id="futures-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 8. RESTOCK -->
+<section class="g" id="restock">
+  <div class="eb">Moments two and three, replayed</div>
+  <div class="h">From sell-out to stock on the shelf, <em>on the same graph.</em></div>
+  <div style="position:absolute;left:72px;right:72px;top:300px;display:flex;align-items:stretch;gap:14px">
+    <div class="card" style="flex:1;padding:22px"><div class="eb" style="font-size:12px">Sell rate</div><div style="font:400 50px var(--serif);margin-top:8px">33<span style="font-size:24px">/day</span></div><div style="font:500 15px var(--sans);color:var(--ink-2)">300 sold in 9 days</div></div>
+    <div style="align-self:center;font:400 44px var(--serif);color:var(--ink-2)">×</div>
+    <div class="card" style="flex:1;padding:22px"><div class="eb" style="font-size:12px">Lead time</div><div style="font:400 50px var(--serif);margin-top:8px">10<span style="font-size:24px"> days</span></div><div style="font:500 15px var(--sans);color:var(--ink-2)">Kavya Garments</div></div>
+    <div style="align-self:center;font:400 44px var(--serif);color:var(--ink-2)">−</div>
+    <div class="card" style="flex:1;padding:22px"><div class="eb" style="font-size:12px">On hand</div><div style="font:400 50px var(--serif);margin-top:8px;color:var(--pulse)">0</div><div style="font:500 15px var(--sans);color:var(--ink-2)">sold out on day 4</div></div>
+    <div style="align-self:center;font:400 44px var(--serif);color:var(--ink-2)">−</div>
+    <div class="card" style="flex:1;padding:22px"><div class="eb" style="font-size:12px">Incoming</div><div style="font:400 50px var(--serif);margin-top:8px">0</div><div style="font:500 15px var(--sans);color:var(--ink-2)">open POs not received</div></div>
+    <div style="align-self:center;font:400 44px var(--serif);color:var(--ink-2)">=</div>
+    <div class="card" style="flex:1.2;padding:22px;background:var(--fathom);border:0;color:var(--cream)"><div class="eb" style="font-size:12px;color:var(--fathom-ink)">Restock</div><div style="font:400 58px var(--serif);margin-top:4px">340</div><div style="font:500 15px var(--sans);color:var(--fathom-ink)">black leggings, size M</div></div>
+  </div>
+  <svg id="restock-svg" width="1600" height="900" style="position:absolute;inset:0;pointer-events:none"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 9. FALKORDB MAP -->
+<section class="g dark" id="falkordb">
+  <div class="eb">Why a graph</div>
+  <div class="h">The questions a brand asks are <em>walks, not lookups.</em></div>
+  <div style="position:absolute;left:72px;right:72px;top:285px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px" id="fk"></div>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+<!-- 10. THE LOOP -->
+<section class="g" id="loop">
+  <div style="position:absolute;left:72px;top:64px;width:560px">
+    <div class="eb">The loop, closed</div>
+    <div class="h" style="font-size:62px">Plan, make, launch, sell, restock, <em>learn.</em></div>
+    <div class="sub">Every product a brand makes runs through the same loop on the same graph. A delay in a factory chat shows up on the launch, the creators and the shelf, and the next collection starts from what this one taught.</div>
+  </div>
+  <svg id="loop-svg" width="1600" height="900" style="position:absolute;inset:0"></svg>
+  <div class="mark"><i>W</i>Weft</div>
+</section>
+
+
+<!-- 11. CLOSE -->
+<section class="g dark" id="close">
+  <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px">
+    <div class="eb">Weft</div>
+    <div class="h" style="font-size:84px;max-width:1300px;letter-spacing:-2.4px">The company harness for <em>D2C brands.</em></div>
+    <div style="display:flex;gap:12px;margin-top:6px"><span style="background:rgba(255,255,235,.1);border:1px solid rgba(207,230,225,.3);border-radius:999px;padding:10px 20px;font:600 18px var(--sans);color:var(--cream)">Plan</span><span style="background:rgba(255,255,235,.1);border:1px solid rgba(207,230,225,.3);border-radius:999px;padding:10px 20px;font:600 18px var(--sans);color:var(--cream)">Make</span><span style="background:rgba(255,255,235,.1);border:1px solid rgba(207,230,225,.3);border-radius:999px;padding:10px 20px;font:600 18px var(--sans);color:var(--cream)">Launch</span><span style="background:rgba(255,255,235,.1);border:1px solid rgba(207,230,225,.3);border-radius:999px;padding:10px 20px;font:600 18px var(--sans);color:var(--cream)">Sell</span><span style="background:rgba(255,255,235,.1);border:1px solid rgba(207,230,225,.3);border-radius:999px;padding:10px 20px;font:600 18px var(--sans);color:var(--cream)">Restock</span><span style="background:rgba(255,255,235,.1);border:1px solid rgba(207,230,225,.3);border-radius:999px;padding:10px 20px;font:600 18px var(--sans);color:var(--cream)">Learn</span></div>
+    <div class="sub" style="font-size:22px;max-width:900px;text-align:center">One live graph of your products, suppliers, orders and creators. AI teammates that chase the updates. You make the calls.</div>
+    <div style="font:600 24px var(--mono);color:#FFD99A;margin-top:10px">weft.kshitijbhardwaj.space</div>
+  </div>
+</section>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const C = getComputedStyle(document.documentElement);
+const v = (n) => C.getPropertyValue(n).trim();
+const KIND = {
+  drop:["--flare-soft","--flare-ink"], style:["--style-soft","--style-ink"], sku:["--glow-soft","--glow-ink"], po:["--po-soft","--po-ink"],
+  sup:["--vendor-soft","--fathom"], creator:["--signal-soft","--signal-ink"], post:["--signal-soft","--signal-ink"], dec:["#F3D9DF","--pulse"],
+  msg:["--surface","--ink-2"], call:["--glow-soft","--glow-ink"], mate:["--dawn","--dawn-ink"], person:["--raised","--ink"], checkin:["--vendor-soft","--fathom"],
+  sample:["--style-soft","--style-ink"], dark:["--fathom","--cream"], ink:["--ink","--cream"], late:["--late-soft","--pulse"], ok:["--ok-soft","--ok-ink"],
+};
+const col = (x) => x.startsWith("--") ? v(x) : x;
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; }
+function defs(svg) {
+  const d = el("defs", {}, svg);
+  for (const [id, c] of [["a", v("--ink-2")], ["h", v("--fathom")], ["r", v("--hot")], ["w", v("--cream")], ["f", v("--fathom-ink")]]) {
+    const m = el("marker", { id: "m" + id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, d);
+    el("path", { d: "M0,0 L10,5 L0,10 z", fill: c }, m);
+  }
+  const f = el("filter", { id: "sh", x: "-20%", y: "-20%", width: "140%", height: "160%" }, d);
+  el("feDropShadow", { dx: 0, dy: 6, stdDeviation: 8, "flood-color": "#1A1A1A", "flood-opacity": .10 }, f);
+}
+function size(n) { const w = n.w ?? Math.max(n.label.length * (n.big ? 13 : 10.5), (n.sub ?? "").length * 7.8) + 40; const h = n.h ?? (n.sub ? 66 : 50); return [w, h]; }
+function node(svg, n) {
+  const [w, h] = size(n); const [bg, fg] = KIND[n.kind] ?? KIND.msg;
+  const g = el("g", { filter: n.flat ? "" : "url(#sh)" }, svg);
+  el("rect", { x: n.x - w / 2, y: n.y - h / 2, width: w, height: h, rx: n.r ?? 14, fill: col(bg), stroke: n.stroke ? col(n.stroke) : (bg === "--surface" ? v("--line-2") : "none"), "stroke-width": n.sw ?? 1.5, "stroke-dasharray": n.dash ?? "" }, g);
+  const t = el("text", { x: n.x, y: n.y + (n.sub ? -4 : 6), "text-anchor": "middle", fill: col(fg), "font-size": n.big ? 21 : 17, "font-weight": 700 }, g); t.textContent = n.label;
+  if (n.sub) { const s = el("text", { x: n.x, y: n.y + 18, "text-anchor": "middle", fill: col(fg), "font-size": 13.5, "font-weight": 500, opacity: .85 }, g); s.textContent = n.sub; }
+  n._w = w; n._h = h; return g;
+}
+function edge(svg, a, b, o = {}) {
+  const dx = b.x - a.x, dy = b.y - a.y, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+  const cut = (n) => { const [w, h] = size(n); return Math.min((w / 2 + 6) / Math.abs(ux || 1e-9), (h / 2 + 6) / Math.abs(uy || 1e-9)); };
+  const x1 = a.x + ux * cut(a), y1 = a.y + uy * cut(a), x2 = b.x - ux * cut(b), y2 = b.y - uy * cut(b);
+  const color = o.color ?? (o.hot ? v("--fathom") : v("--ink-2"));
+  el("line", { x1, y1, x2, y2, stroke: color, "stroke-width": o.hot ? 3.5 : 1.6, "stroke-dasharray": o.dash ?? "", "marker-end": o.noarrow ? "" : `url(#m${o.m ?? (o.hot ? "h" : "a")})`, opacity: o.op ?? 1 }, svg);
+  if (o.label) {
+    const mx = (x1 + x2) / 2 + (o.lx ?? 0), my = (y1 + y2) / 2 + (o.ly ?? 0);
+    const w = o.label.length * 7.6 + 14;
+    el("rect", { x: mx - w / 2, y: my - 12, width: w, height: 22, rx: 6, fill: o.lbg ?? v("--canvas") }, svg);
+    const t = el("text", { x: mx, y: my + 4, "text-anchor": "middle", "font-size": 12, "font-weight": 700, fill: o.lc ?? (o.hot ? v("--fathom") : v("--ink-2")), "font-family": "JetBrains Mono, monospace" }, svg); t.textContent = o.label;
+  }
+}
+function text(svg, x, y, s, o = {}) { const t = el("text", { x, y, "text-anchor": o.anchor ?? "start", "font-size": o.size ?? 16, "font-weight": o.weight ?? 500, fill: col(o.fill ?? "--ink-2"), "font-family": o.serif ? "EB Garamond, Georgia, serif" : (o.mono ? "JetBrains Mono, monospace" : "Figtree, sans-serif"), "font-style": o.italic ? "italic" : "normal" }, svg); t.textContent = s; return t; }
+function draw(id, nodes, edges, extra) {
+  const svg = document.getElementById(id); defs(svg);
+  const N = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  if (extra?.under) extra.under(svg, N);
+  edges.forEach((e) => edge(svg, N[e[0]], N[e[1]], e[2] ?? {}));
+  nodes.forEach((n) => node(svg, n));
+  if (extra?.over) extra.over(svg, N);
+}
+
+/* 1. cover: constellation on the right */
+draw("cover-svg", [
+  { id: "drop", label: "Black Drop", sub: "live 1 Dec", kind: "drop", x: 1190, y: 450, big: true },
+  { id: "leg", label: "Core Leggings", kind: "style", x: 1010, y: 300 },
+  { id: "bra", label: "Sculpt Bra", kind: "style", x: 1370, y: 270 },
+  { id: "tank", label: "Everyday Tank", kind: "style", x: 1430, y: 600 },
+  { id: "sku", label: "LEG-BLK-M", kind: "sku", x: 900, y: 170 },
+  { id: "po", label: "PO-014", kind: "po", x: 860, y: 450 },
+  { id: "sri", label: "Sri Lakshmi Knits", kind: "sup", x: 880, y: 610 },
+  { id: "kav", label: "Kavya Garments", kind: "sup", x: 1230, y: 760 },
+  { id: "ria", label: "@runwithria", kind: "creator", x: 1440, y: 140 },
+  { id: "post", label: "\"live 1 Dec\"", kind: "post", x: 1460, y: 420 },
+  { id: "dec", label: "Decision", sub: "by Kshitij", kind: "dec", x: 1010, y: 760 },
+  { id: "msg", label: "\"fabric delayed\"", kind: "msg", x: 1180, y: 160 },
+], [
+  ["leg", "drop", { color: v("--fathom-ink"), op: .6, m: "f" }], ["bra", "drop", { color: v("--fathom-ink"), op: .6, m: "f" }], ["tank", "drop", { color: v("--fathom-ink"), op: .6, m: "f" }],
+  ["sku", "leg", { color: v("--fathom-ink"), op: .6, m: "f" }], ["po", "leg", { color: v("--fathom-ink"), op: .6, m: "f" }], ["po", "sri", { color: v("--fathom-ink"), op: .6, m: "f" }],
+  ["tank", "kav", { color: v("--fathom-ink"), op: .45, m: "f", dash: "4 6" }], ["post", "drop", { color: v("--fathom-ink"), op: .6, m: "f" }], ["ria", "post", { color: v("--fathom-ink"), op: .6, m: "f" }],
+  ["dec", "po", { color: v("--fathom-ink"), op: .6, m: "f" }], ["msg", "po", { color: "#FFD99A", op: .9, m: "w", dash: "5 5" }], ["dec", "kav", { color: v("--fathom-ink"), op: .45, m: "f", dash: "4 6" }],
+]);
+
+/* 2. router */
+(() => {
+  const svg = document.getElementById("router-svg"); defs(svg);
+  const cx = 800, cy = 560;
+  const tools = [
+    { x: 330, y: 400, k: "Plan", t: "Black Drop tracker.xlsx", s: "Last edited by Rohan · 12 Nov", c: "--ok-soft", f: "--ok-ink", a: "copies dates in and out" },
+    { x: 1270, y: 400, k: "Make", t: "12 WhatsApp groups", s: "\"Sir, fabric delayed. Coming 28th.\"", c: "--vendor-soft", f: "--fathom", a: "chases suppliers" },
+    { x: 330, y: 730, k: "Sell", t: "Shopify", s: "Black Drop · scheduled 1 Dec, 00:00", c: "--glow-soft", f: "--glow-ink", a: "checks what sold" },
+    { x: 1270, y: 730, k: "Restock", t: "Memory", s: "\"I think M is running low?\"", c: "--signal-soft", f: "--signal-ink", a: "guesses the reorder" },
+  ];
+  for (const t of tools) {
+    el("line", { x1: t.x + (t.x < cx ? 190 : -190), y1: t.y, x2: cx + (t.x < cx ? -105 : 105), y2: cy + (t.y < cy ? -40 : 40), stroke: v("--hot"), "stroke-width": 2.2, "stroke-dasharray": "7 7", "marker-end": "url(#mr)", "marker-start": "url(#mr)" }, svg);
+    const mx = (t.x + (t.x < cx ? 190 : -190) + cx + (t.x < cx ? -105 : 105)) / 2, my = (t.y + cy + (t.y < cy ? -40 : 40)) / 2;
+    el("rect", { x: mx - t.a.length * 4.4 - 10, y: my - 15, width: t.a.length * 8.8 + 20, height: 30, rx: 15, fill: v("--late-soft") }, svg);
+    text(svg, mx, my + 5, t.a, { anchor: "middle", size: 14.5, weight: 700, fill: "--pulse" });
+    const g = el("g", { filter: "url(#sh)" }, svg);
+    el("rect", { x: t.x - 190, y: t.y - 70, width: 380, height: 140, rx: 20, fill: v("--surface") }, g);
+    el("rect", { x: t.x - 190, y: t.y - 70, width: 10, height: 140, rx: 5, fill: col(t.c) }, g);
+    text(g, t.x - 160, t.y - 32, t.k.toUpperCase(), { size: 13, weight: 800, fill: t.f });
+    text(g, t.x - 160, t.y + 4, t.t, { size: 26, weight: 400, fill: "--ink", serif: true });
+    text(g, t.x - 160, t.y + 38, t.s, { size: 15, weight: 500, fill: "--ink-2" });
+  }
+  const g = el("g", { filter: "url(#sh)" }, svg);
+  el("circle", { cx, cy, r: 104, fill: v("--ink") }, g);
+  text(g, cx, cy - 6, "Kshitij", { anchor: "middle", size: 34, weight: 400, fill: "--cream", serif: true });
+  text(g, cx, cy + 24, "founder · the router", { anchor: "middle", size: 14, weight: 700, fill: "--fathom-ink" });
+  text(svg, cx, 870, "Nothing connects a factory chat to a creator post, or a sell-out to a reorder. Only a person does.", { anchor: "middle", size: 19, weight: 500, fill: "--ink-2" });
+})();
+
+/* 3. three moments */
+(() => {
+  const svg = document.getElementById("moments-svg"); defs(svg);
+  const y = 520, x0 = 120, x1 = 1480;
+  el("line", { x1: x0, y1: y, x2: x1, y2: y, stroke: v("--ink"), "stroke-width": 3 }, svg);
+  const X = (d) => x0 + (x1 - x0) * (d / 40); // day 0 = 18 Nov
+  const ticks = [[0, "18 Nov"], [13, "1 Dec · launch"], [17, "5 Dec"], [24, "12 Dec"], [37, "25 Dec"]];
+  for (const [d, l] of ticks) { el("circle", { cx: X(d), cy: y, r: d === 13 ? 11 : 7, fill: d === 13 ? v("--fathom") : v("--ink") }, svg); text(svg, X(d), y + 40, l, { anchor: "middle", size: 16, weight: 700, fill: d === 13 ? "--fathom" : "--ink" }); }
+  el("rect", { x: X(0), y: y - 16, width: X(13) - X(0), height: 32, rx: 8, fill: v("--late-soft"), opacity: .9 }, svg);
+  text(svg, (X(0) + X(13)) / 2, y + 5, "13 days nobody connected", { anchor: "middle", size: 14, weight: 800, fill: "--pulse" });
+  el("rect", { x: X(17), y: y - 16, width: X(24) - X(17), height: 32, rx: 8, fill: v("--late-soft"), opacity: .9 }, svg);
+  text(svg, (X(17) + X(24)) / 2, y + 5, "a week of lost sales", { anchor: "middle", size: 14, weight: 800, fill: "--pulse" });
+  const cards = [
+    { d: 0, n: "1", t: "The fabric is late", b: ["Murugan writes in a WhatsApp group:", "\"Sir, fabric delayed. Coming 28th.\"", "Three creators still post \"live 1 Dec\"."], up: true },
+    { d: 17, n: "2", t: "Size M sells out on day 4", b: ["Black leggings M is gone by 5 Dec.", "The reorder goes out a week later,", "because nobody checked the lead time."], up: false },
+    { d: 37, n: "3", t: "The restock lands", b: ["The boxes arrive, but the tracker", "still says 0 on hand. The next", "reorder starts from a wrong number."], up: true },
+  ];
+  for (const c of cards) {
+    const cx = Math.min(Math.max(X(c.d), 290), 1310), cy = c.up ? 330 : 720;
+    el("line", { x1: X(c.d), y1: y + (c.up ? -12 : 12), x2: X(c.d), y2: cy + (c.up ? 80 : -80), stroke: v("--hot"), "stroke-width": 2, "stroke-dasharray": "4 5" }, svg);
+    const g = el("g", { filter: "url(#sh)" }, svg);
+    el("rect", { x: cx - 230, y: cy - 80, width: 460, height: 160, rx: 20, fill: v("--surface") }, g);
+    el("circle", { cx: cx - 190, cy: cy - 40, r: 20, fill: v("--hot") }, g);
+    text(g, cx - 190, cy - 33, c.n, { anchor: "middle", size: 19, weight: 800, fill: "--cream" });
+    text(g, cx - 158, cy - 32, c.t, { size: 26, weight: 400, fill: "--ink", serif: true });
+    c.b.forEach((line, i) => text(g, cx - 205, cy + 4 + i * 24, line, { size: 15.5, weight: 500, fill: i === 1 && c.n === "1" ? "--pulse" : "--ink-2" }));
+  }
+})();
+
+/* 4. the graph model */
+draw("graph-svg", [
+  { id: "sup", label: "Supplier", sub: "Sri Lakshmi Knits", kind: "sup", x: 150, y: 560 },
+  { id: "po", label: "PO", sub: "PO-014 · 600 pcs", kind: "po", x: 380, y: 560 },
+  { id: "sku", label: "SKU", sub: "LEG-BLK-M", kind: "sku", x: 610, y: 560 },
+  { id: "style", label: "Style", sub: "Core Leggings", kind: "style", x: 840, y: 560 },
+  { id: "drop", label: "Drop", sub: "Black Drop · 1 Dec", kind: "drop", x: 1070, y: 560 },
+  { id: "post", label: "CreatorPost", sub: "\"live 1 Dec\"", kind: "post", x: 1300, y: 560 },
+  { id: "cr", label: "Creator", sub: "@runwithria", kind: "creator", x: 1490, y: 400 },
+  { id: "ci", label: "CheckIn", sub: "fabric in?", kind: "checkin", x: 280, y: 380 },
+  { id: "call", label: "Call", sub: "delay · open", kind: "call", x: 560, y: 380 },
+  { id: "mate", label: "Teammate", sub: "Shuttle", kind: "mate", x: 800, y: 330 },
+  { id: "person", label: "Person", sub: "Rohan · Manager", kind: "person", x: 380, y: 760 },
+  { id: "dec", label: "Decision", sub: "Moved to Kavya", kind: "dec", x: 700, y: 760 },
+  { id: "msg", label: "Message", sub: "#ops · 14 Sep", kind: "msg", x: 1000, y: 760 },
+  { id: "sample", label: "Sample", sub: "fit · approved", kind: "sample", x: 1150, y: 360 },
+], [
+  ["po", "sup", { label: "MADE_BY", hot: true, ly: -26 }], ["po", "sku", { label: "SUPPLIES", hot: true, ly: -26 }], ["sku", "style", { label: "OF_STYLE", hot: true, ly: -26 }], ["style", "drop", { label: "IN_DROP", hot: true, ly: -26 }], ["post", "drop", { label: "PROMOTES", hot: true, ly: -26 }], ["cr", "post", { label: "POSTED", hot: true, lx: 18 }],
+  ["po", "ci", { label: "HAS_CHECKIN" }], ["call", "po", { label: "ABOUT" }], ["call", "mate", { label: "RAISED_BY", ly: -8 }], ["person", "po", { label: "OWNS" }], ["dec", "po", { label: "ABOUT", lx: 20 }], ["dec", "msg", { label: "SOURCED_FROM" }], ["style", "sample", { label: "HAS_SAMPLE", lx: 26 }],
+], { over: (svg) => { text(svg, 72, 870, "Thick path: the walk from a factory order to the creators who promised its date. Every Call and Decision points back to where it came from.", { size: 17, weight: 500, fill: "--ink-2" }); } });
+
+/* 6. delay walk */
+(() => {
+  const nodes = [
+    { id: "po", label: "PO-014", sub: "Sri Lakshmi Knits", kind: "po", x: 170, y: 520, big: true },
+    { id: "s1", label: "LEG-BLK-S", kind: "sku", x: 430, y: 430 }, { id: "s2", label: "LEG-BLK-M", kind: "sku", x: 430, y: 520 }, { id: "s3", label: "LEG-BLK-L", kind: "sku", x: 430, y: 610 },
+    { id: "style", label: "Core Leggings", kind: "style", x: 680, y: 520 },
+    { id: "drop", label: "Black Drop", sub: "goes live 1 Dec", kind: "drop", x: 920, y: 520, big: true },
+    { id: "p1", label: "post · 25 Nov", kind: "post", x: 1170, y: 420 }, { id: "p2", label: "post · 25 Nov", kind: "post", x: 1170, y: 520 }, { id: "p3", label: "post · 25 Nov", kind: "post", x: 1170, y: 620 },
+    { id: "c1", label: "@runwithria", kind: "creator", x: 1420, y: 420 }, { id: "c2", label: "@liftwithdev", kind: "creator", x: 1420, y: 520 }, { id: "c3", label: "@yogawithtara", kind: "creator", x: 1420, y: 620 },
+    { id: "msg", label: "\"Sir, fabric delayed. Coming 28th.\"", sub: "Murugan · WhatsApp · 18 Nov", kind: "msg", x: 300, y: 300 },
+  ];
+  const H = { hot: true };
+  draw("walk-svg", nodes, [
+    ["msg", "po", { dash: "6 6", color: v("--hot"), m: "r" }],
+    ["po", "s1", H], ["po", "s2", H], ["po", "s3", H], ["s1", "style", H], ["s2", "style", H], ["s3", "style", H], ["style", "drop", H],
+    ["p1", "drop", H], ["p2", "drop", H], ["p3", "drop", H], ["c1", "p1", H], ["c2", "p2", H], ["c3", "p3", H],
+  ], { over: (svg) => {
+    const hops = [[300, "SUPPLIES"], [555, "OF_STYLE"], [800, "IN_DROP"], [1045, "PROMOTES"], [1295, "POSTED"]];
+    hops.forEach(([x, l], i) => { el("circle", { cx: x, cy: 720, r: 15, fill: v("--fathom") }, svg); text(svg, x, 726, String(i + 1), { anchor: "middle", size: 15, weight: 800, fill: "--cream" }); text(svg, x, 760, l, { anchor: "middle", size: 13, weight: 700, fill: "--fathom", mono: true }); });
+    const g = el("g", { filter: "url(#sh)" }, svg);
+    el("rect", { x: 1010, y: 236, width: 520, height: 110, rx: 18, fill: v("--late-soft") }, g);
+    text(g, 1034, 278, "Lands 5 Dec, 4 days after launch", { size: 25, weight: 400, fill: "--pulse", serif: true });
+    text(g, 1034, 312, "3 creator posts break · owner: Rohan · one query", { size: 16, weight: 600, fill: "--pulse" });
+    text(svg, 72, 850, "Shuttle runs this walk the moment the answer lands, and raises a call with the impact attached.", { size: 18, weight: 500, fill: "--ink-2" });
+  } });
+})();
+
+/* 7. two futures */
+(() => {
+  const svg = document.getElementById("futures-svg"); defs(svg);
+  const box = (x, y, w, h, fill, stroke) => { const g = el("g", { filter: "url(#sh)" }, svg); el("rect", { x, y, width: w, height: h, rx: 22, fill: col(fill), stroke: stroke ? col(stroke) : "none", "stroke-width": 2 }, g); return g; };
+  // the plan
+  let g = box(80, 360, 330, 300, "--ink");
+  text(g, 110, 410, "THE PLAN", { size: 13, weight: 800, fill: "--fathom-ink" });
+  text(g, 110, 450, "graph weft", { size: 30, weight: 400, fill: "--cream", serif: true });
+  ["15 SKUs · 5 POs", "3 suppliers · 3 creators", "PO-014 at Sri Lakshmi", "lands 5 Dec (late)"].forEach((s, i) => text(g, 110, 500 + i * 34, s, { size: 17, weight: 500, fill: i === 3 ? "#FFB4A2" : "--fathom-ink" }));
+  // fork
+  el("path", { d: "M 420 510 C 520 510, 520 330, 640 330", fill: "none", stroke: v("--ink-2"), "stroke-width": 2.5, "marker-end": "url(#ma)" }, svg);
+  el("path", { d: "M 420 510 C 520 510, 520 690, 640 690", fill: "none", stroke: v("--fathom"), "stroke-width": 3.5, "marker-end": "url(#mh)" }, svg);
+  el("rect", { x: 440, y: 586, width: 150, height: 28, rx: 8, fill: v("--fathom") }, svg);
+  text(svg, 515, 605, "GRAPH.COPY", { anchor: "middle", size: 14, weight: 700, fill: "--cream", mono: true });
+  // reality
+  g = box(650, 220, 520, 230, "--surface");
+  text(g, 680, 262, "REALITY, WITH THE DELAY", { size: 13, weight: 800, fill: "--ink-2" });
+  [["PO-014 arrives", "5 Dec · 4 days late", "--pulse"], ["Black Drop, 1 Dec", "Late", "--pulse"], ["Creator posts", "3 broken", "--pulse"], ["Cost", "₹2,52,000", "--ink"]].forEach(([k, val, c], i) => { text(g, 680, 305 + i * 36, k, { size: 17, weight: 500, fill: "--ink-2" }); text(g, 1140, 305 + i * 36, val, { anchor: "end", size: 17, weight: 700, fill: c }); });
+  // scenario
+  g = box(650, 580, 520, 230, "#F7F1FB", "--dawn");
+  text(g, 680, 622, "SCENARIO · PO-014 MOVES TO KAVYA", { size: 13, weight: 800, fill: "--dawn-ink" });
+  [["PO-014 arrives", "28 Nov · 3 days spare", "--ok-ink"], ["Black Drop, 1 Dec", "On time", "--ok-ink"], ["Creator posts", "All kept", "--ok-ink"], ["Cost", "₹2,64,000 (+₹12,000)", "--glow-ink"]].forEach(([k, val, c], i) => { text(g, 680, 665 + i * 36, k, { size: 17, weight: 500, fill: "--dawn-ink" }); text(g, 1140, 665 + i * 36, val, { anchor: "end", size: 17, weight: 700, fill: c }); });
+  // apply
+  el("path", { d: "M 1180 695 C 1290 695, 1290 520, 1330 520", fill: "none", stroke: v("--fathom"), "stroke-width": 3.5, "marker-end": "url(#mh)" }, svg);
+  g = box(1340, 400, 200, 240, "--fathom");
+  text(g, 1440, 446, "APPLY TO PLAN", { anchor: "middle", size: 13, weight: 800, fill: "--fathom-ink" });
+  ["The copy", "replaces", "the plan"].forEach((s, i) => text(g, 1440, 492 + i * 30, s, { anchor: "middle", size: 22, weight: 400, fill: "--cream", serif: true }));
+  el("rect", { x: 1356, y: 586, width: 168, height: 38, rx: 10, fill: "#F3D9DF" }, g);
+  text(g, 1440, 610, "Decision · Kshitij", { anchor: "middle", size: 14, weight: 700, fill: "--pulse" });
+  text(svg, 72, 870, "Same question, asked of two graphs. Nothing reaches suppliers or the plan until an Owner or Manager applies it.", { size: 18, weight: 500, fill: "--ink-2" });
+})();
+
+/* 8. restock strip */
+(() => {
+  const svg = document.getElementById("restock-svg"); defs(svg);
+  const steps = [
+    { t: "Pattern drafts", s: "a restock call, with the math", k: "--glow-soft", f: "--glow-ink" },
+    { t: "Owner approves", s: "Approve PO, on Today", k: "--surface", f: "--ink" },
+    { t: "PO-020", s: "340 pcs to Kavya · lands 20 Dec", k: "--po-soft", f: "--po-ink" },
+    { t: "Mark received", s: "on the Production board", k: "--vendor-soft", f: "--fathom" },
+    { t: "On hand 340", s: "up from 0, on the same SKU", k: "--fathom", f: "--cream" },
+  ];
+  const w = 268, gap = 22, y = 590;
+  steps.forEach((s, i) => {
+    const x = 72 + i * (w + gap);
+    const g = el("g", { filter: "url(#sh)" }, svg);
+    el("rect", { x, y, width: w, height: 120, rx: 18, fill: col(s.k), stroke: s.k === "--surface" ? v("--line-2") : "none" }, g);
+    text(g, x + 22, y + 50, s.t, { size: 26, weight: 400, fill: s.f, serif: true });
+    text(g, x + 22, y + 84, s.s, { size: 14.5, weight: 600, fill: s.f });
+    if (i < steps.length - 1) el("line", { x1: x + w + 2, y1: y + 60, x2: x + w + gap - 2, y2: y + 60, stroke: v("--fathom"), "stroke-width": 3, "marker-end": "url(#mh)" }, svg);
+  });
+  text(svg, 72, 790, "Incoming stock counts against the next suggestion, so an approved restock is never ordered twice.", { size: 18, weight: 500, fill: "--ink-2" });
+})();
+
+/* 9. falkordb map */
+(() => {
+  const F = [
+    ["Multi-hop Cypher", "Moment one", "PO → SKU → Style → Drop ← Post ← Creator, in one query that runs inside every agent step."],
+    ["GRAPH.COPY", "Two futures", "Each scenario is a full private copy of the plan. Apply copies it back and records the decision."],
+    ["Many graphs, one instance", "The clock", "weft is the plan, weft_live is day 9, weft_meta holds settings, weft_scn_* are scenarios."],
+    ["algo.pageRank", "Risk", "PageRank over MADE_BY edges ranks the suppliers the drop leans on most."],
+    ["Full-text + range indexes", "The Brand map", "Search olive and every matching SKU, style and PO lights up; ids resolve instantly."],
+    ["GRAPH.RO_QUERY", "See why", "Every teammate query is read-only and listed next to the answer it produced."],
+  ];
+  document.getElementById("fk").innerHTML = F.map(([f, m, d]) => `
+    <div style="background:rgba(255,255,235,.07);border:1px solid rgba(207,230,225,.22);border-radius:20px;padding:24px 26px;min-height:220px">
+      <div style="font:600 21px var(--mono);color:#FFD99A">${f}</div>
+      <div style="font:700 13px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--fathom-ink);margin-top:14px">${m}</div>
+      <div style="font:500 18px/1.5 var(--sans);color:var(--cream);margin-top:8px">${d}</div>
+    </div>`).join("");
+})();
+
+/* 10. the loop */
+(() => {
+  const svg = document.getElementById("loop-svg"); defs(svg);
+  const cx = 1130, cy = 470, R = 300;
+  el("circle", { cx, cy, r: R, fill: "none", stroke: v("--line-2"), "stroke-width": 2, "stroke-dasharray": "3 9" }, svg);
+  const S = [["Plan", "drop, styles, SKUs, samples", "--ok-soft", "--ok-ink"], ["Make", "Shuttle's check-ins and calls", "--vendor-soft", "--fathom"], ["Launch", "posts tied to the drop date", "--flare-soft", "--flare-ink"], ["Sell", "orders, returns, creator codes", "--glow-soft", "--glow-ink"], ["Restock", "Pattern's reorders to receipt", "--po-soft", "--po-ink"], ["Learn", "decisions with their source", "--dawn", "--dawn-ink"]];
+  const P = S.map((_, i) => { const a = -Math.PI / 2 + i * (2 * Math.PI / S.length); return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; });
+  P.forEach(([x, y], i) => { const [nx, ny] = P[(i + 1) % P.length]; const mx = (x + nx) / 2, my = (y + ny) / 2; const ox = (mx - cx) * .14, oy = (my - cy) * .14;
+    el("path", { d: `M ${x + (nx - x) * .3} ${y + (ny - y) * .3} Q ${mx + ox} ${my + oy} ${x + (nx - x) * .7} ${y + (ny - y) * .7}`, fill: "none", stroke: v("--fathom"), "stroke-width": 3, "marker-end": "url(#mh)" }, svg); });
+  S.forEach(([t, d, bg, fg], i) => { const [x, y] = P[i]; const g = el("g", { filter: "url(#sh)" }, svg);
+    el("rect", { x: x - 120, y: y - 44, width: 240, height: 88, rx: 18, fill: col(bg) }, g);
+    text(g, x, y - 4, t, { anchor: "middle", size: 28, weight: 400, fill: fg, serif: true });
+    text(g, x, y + 24, d, { anchor: "middle", size: 13.5, weight: 600, fill: fg }); });
+  const g = el("g", { filter: "url(#sh)" }, svg);
+  el("circle", { cx, cy, r: 118, fill: v("--fathom") }, g);
+  text(g, cx, cy - 18, "FALKORDB", { anchor: "middle", size: 13, weight: 800, fill: "--fathom-ink" });
+  text(g, cx, cy + 16, "one graph", { anchor: "middle", size: 34, weight: 400, fill: "--cream", serif: true });
+  text(g, cx, cy + 46, "per drop", { anchor: "middle", size: 20, weight: 400, fill: "--fathom-ink", serif: true, italic: true });
+})();
+</script>
+</body>
+</html>
