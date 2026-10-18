@@ -28,7 +28,7 @@ export default function Welcome() {
             <p className="lp-dek">A D2C product is planned, made, sold and restocked, and every stage lives in a different tool. Weft keeps one live plan per drop on a FalkorDB graph, with AI teammates that chase the updates and show what every change breaks.</p>
             <div className="lp-cta">
               <Link href="/login" className="btn fathom lg">Open the live demo →</Link>
-              <a href="#demo" className="btn ghost lg">Watch the 3-minute demo</a>
+              <a href="#demo" className="btn ghost lg">Watch the demo (3½ min)</a>
             </div>
             <div className="lp-meta">Demo login is on the next screen. Case study: the Black Drop, a fitness-wear collection.</div>
           </div>

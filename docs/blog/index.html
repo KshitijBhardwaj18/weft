@@ -91,12 +91,14 @@ footer{margin:70px 0 50px;padding-top:22px;border-top:1px solid var(--line);font
     Your browser does not play this video. Download <a href="../demo/weft-demo.mp4">the demo</a>.
   </video>
 </div>
-<div class="caption">The demo: a screen recording of the running app on the Black Drop case study, with captions. About two minutes.</div>
+<div class="caption">The demo: a screen recording of the running app on the Black Drop case study, with captions. About three and a half minutes: the problem and the solution as infographics, then a real walkthrough and how we use FalkorDB.</div>
 
 <h2>The problem</h2>
 <p>Thirteen days before our Black Drop goes live, a message arrives in a WhatsApp group: the fabric for the leggings is late. It sits between a dozen other messages. Three creators have already scheduled posts that say the drop goes live on 1 December. Nothing we use connects the two.</p>
 <p>That is the first failure. The second comes after launch. The black leggings in size M sell out on day four, and the reorder waits a week, because nobody compared sell-through with the supplier's lead time. The third is quieter. When the restock arrives, the stock count is still wrong, so the next reorder is wrong too.</p>
 <p>A D2C product is planned, made, sold and restocked. Each stage has its own tool, and the founder carries information between them. Every tool sees one stage. The problems that matter sit at the joins, and they stay invisible until a customer or a creator notices.</p>
+
+<figure><img src="screens/problem.png" alt="Every stage of a product lives in a different tool" loading="lazy"></figure>
 
 <h2>The loop</h2>
 <p>Weft follows one product through six stages. Each stage reads and writes the same graph, so a change in one stage shows up in the others.</p>
@@ -109,6 +111,8 @@ footer{margin:70px 0 50px;padding-top:22px;border-top:1px solid var(--line);font
   <tr><td><b>Restock</b></td><td>Judgement, or a late reorder</td><td>A restock drafted from sell-through and lead time, a PO on approval, stock up on receipt</td><td><span class="tag t-built">Built</span></td></tr>
   <tr><td><b>Learn</b></td><td>Decisions kept in memory</td><td>Decisions recorded with their source; creators ranked by orders and repeat rate</td><td><span class="tag t-part">Partly built</span></td></tr>
 </table>
+
+<figure><img src="screens/solution.png" alt="One live plan per drop, as a graph" loading="lazy"></figure>
 
 <h2>The case study: the Black Drop</h2>
 <p>The case study is a premium fitness-wear brand in India and its first collection. Three styles (Core Leggings, Sculpt Sports Bra, Everyday Tank) make fifteen SKUs in black and olive, sizes S, M and L, for 2,100 units. Sri Lakshmi Knits in Tiruppur makes the leggings and the bra on a 14-day lead time. Kavya Garments in Bengaluru makes the tanks on 10 days. Three creators, each with a discount code, post on 25 November.</p>

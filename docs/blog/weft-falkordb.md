@@ -10,7 +10,7 @@ Weft is what we built for FalkorDB's Graph Hacks: Context for AI Agents hackatho
 
 **Try it live:** https://weft.kshitijbhardwaj.space. Sign in with `founder@blackdrop.in` / `blackdrop` (shown on the login page); a guided tour walks through every feature below and names the FalkorDB feature behind each one.
 
-**Demo video:** https://weft.kshitijbhardwaj.space/weft-demo.mp4
+**Demo video (3½ min):** https://weft.kshitijbhardwaj.space/weft-demo.mp4
 
 **Code:** https://github.com/KshitijBhardwaj18/weft
 
@@ -23,6 +23,8 @@ A D2C product is planned, made, sold and restocked. Each stage has its own tool,
 - **Selling.** Shopify holds orders, refunds and discount codes. Creators post dates that nobody checks against production.
 - **Restocking.** A size sells out, and the reorder waits because sell-through is not compared with lead time. When goods arrive, the stock count is updated by hand, or not at all.
 - **Deciding.** A supplier change agreed on a call is never written down, so months later nobody can say why it happened.
+
+![Every stage of a product lives in a different tool](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/problem.png)
 
 Small brands of five to thirty people run this loop every day, and the founder is the router. Every tool sees one stage. The problems that matter sit at the joins, between making and selling and between selling and making again, and they stay invisible until a customer or a creator notices.
 
@@ -38,6 +40,8 @@ Weft follows one product through six stages. Each stage reads and writes the sam
 | **Sell** | One Shopify dashboard per question | Orders, refunds and returns written onto SKU and creator nodes | Built. The demo uses seeded orders |
 | **Restock** | Judgement, or a late reorder | A restock drafted from sell-through and lead time, a PO on approval, stock up on receipt | Built |
 | **Learn** | Decisions kept in memory | Every decision recorded with its source, creators ranked by orders and repeat rate | Partly built |
+
+![One live plan per drop, as a graph](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/solution.png)
 
 ## The case study: the Black Drop
 
@@ -149,6 +153,8 @@ The questions that matter are about connections, not records. "Which creator pos
 A relational schema can answer that with joins written for each question. We wanted the walk to be the query itself, and we wanted the same walk inside every step an agent takes.
 
 FalkorDB does what the product needs:
+
+![Every FalkorDB feature maps to something the app does](https://raw.githubusercontent.com/KshitijBhardwaj18/weft/main/docs/blog/screens/falkordb.png)
 
 - **Multi-hop traversal** for delay impact, which runs inside every agent step rather than as a nightly job.
 - **Many graphs in one instance.** Each scenario is its own graph, copied with `GRAPH.COPY`.

@@ -8,7 +8,7 @@ A D2C product is planned, made, sold and restocked, and each stage lives in a di
 
 - **Live:** https://weft.kshitijbhardwaj.space (landing page → *Open the live demo*)
 - **Demo login** (also shown on the login page): `founder@blackdrop.in` / `blackdrop`. Signing in starts a guided tour of the major features, each step naming the FalkorDB feature behind it. *Reset demo data* in the tour reseeds the graphs.
-- **Video:** [docs/demo/weft-demo.mp4](docs/demo/weft-demo.mp4)
+- **Video (3½ min):** https://weft.kshitijbhardwaj.space/weft-demo.mp4 (also [docs/demo/weft-demo.mp4](docs/demo/weft-demo.mp4)): the problem and solution as infographics, a real walkthrough, and how we use FalkorDB
 - **Blog post:** [docs/blog/weft-falkordb.md](docs/blog/weft-falkordb.md)
 
 ### Deployment
