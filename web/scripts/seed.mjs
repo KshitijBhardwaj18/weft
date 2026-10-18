@@ -69,9 +69,9 @@ async function build(name, phase) {
            (:Teammate {id:'weft', name:'Weft', role:'Chief of staff'}),
            (:Teammate {id:'shuttle', name:'Shuttle', role:'Production lead'}),
            (:Teammate {id:'pattern', name:'Pattern', role:'Sales analyst'}),
-           (:Supplier {id:'sri', name:'Sri Lakshmi Knits', type:'Factory', city:'Tiruppur', leadDays:14, contact:'Murugan'}),
-           (:Supplier {id:'kavya', name:'Kavya Garments', type:'Factory', city:'Bengaluru', leadDays:10, contact:'Kavya'}),
-           (:Supplier {id:'ananya', name:'Ananya Fabrics', type:'Mill', city:'Surat', leadDays:7, contact:'Ananya'}),
+           (:Supplier {id:'sri', name:'Sri Lakshmi Knits', type:'Factory', city:'Tiruppur', leadDays:14, contact:'Murugan', email:'murugan@srilakshmi.example.com', whatsapp:'+919800000001'}),
+           (:Supplier {id:'kavya', name:'Kavya Garments', type:'Factory', city:'Bengaluru', leadDays:10, contact:'Kavya', email:'kavya@kavyagarments.example.com', whatsapp:'+919800000002'}),
+           (:Supplier {id:'ananya', name:'Ananya Fabrics', type:'Mill', city:'Surat', leadDays:7, contact:'Ananya', email:'ananya@ananyafabrics.example.com', whatsapp:'+919800000003'}),
            (:Drop {id:'black-drop', name:'Black Drop', date:'2026-12-01', phase:$phase, today:$today, orders:$orders})`,
     { phase, today: live ? "2026-12-10" : "2026-11-18", orders: live ? 958 : 0 });
 
@@ -116,6 +116,35 @@ async function build(name, phase) {
     CREATE (dec:Decision {id:'d-choose-sri', text:'Chose Sri Lakshmi Knits for leggings and sports bra', at:'2026-09-14', by:'Kshitij'})-[:ABOUT]->(sri),
            (dec)-[:SOURCED_FROM]->(m1), (dec)-[:SOURCED_FROM]->(m2), (k)-[:DECIDED]->(dec),
            (d)-[:SOURCED_FROM]->(m4)`);
+
+  // Conversations: supplier chats, team channels, and a chat with each teammate
+  await run(`
+    UNWIND $chans AS c CREATE (:Channel {id:c.id, kind:c.kind, name:c.name, supplierId:c.supplierId, teammate:c.teammate})`,
+    { chans: [
+      { id: "sup-sri", kind: "supplier", name: "Sri Lakshmi Knits", supplierId: "sri", teammate: null },
+      { id: "sup-kavya", kind: "supplier", name: "Kavya Garments", supplierId: "kavya", teammate: null },
+      { id: "sup-ananya", kind: "supplier", name: "Ananya Fabrics", supplierId: "ananya", teammate: null },
+      { id: "team-ops", kind: "team", name: "ops", supplierId: null, teammate: null },
+      { id: "team-marketing", kind: "team", name: "marketing", supplierId: null, teammate: null },
+      { id: "agent-weft", kind: "agent", name: "Weft", supplierId: null, teammate: "weft" },
+      { id: "agent-shuttle", kind: "agent", name: "Shuttle", supplierId: null, teammate: "shuttle" },
+      { id: "agent-pattern", kind: "agent", name: "Pattern", supplierId: null, teammate: "pattern" },
+    ] });
+  // Existing messages belong to team channels; give them chat fields
+  await run(`
+    MATCH (m:Message) WITH m, CASE m.channel WHEN '#marketing' THEN 'team-marketing' ELSE 'team-ops' END AS cid
+    MATCH (c:Channel {id:cid})
+    SET m.authorKind = 'person', m.at = m.at + 'T10:00:00.000Z', m.card = null
+    CREATE (m)-[:IN]->(c)`);
+  await run(`
+    MATCH (sri:Channel {id:'sup-sri'}), (kav:Channel {id:'sup-kavya'}), (an:Channel {id:'sup-ananya'}), (ops:Channel {id:'team-ops'})
+    CREATE (:Message {id:'m-sri-1', author:'Rohan', authorKind:'person', at:'2026-11-04T09:10:00.000Z', card:null, text:'Murugan, PO-014 for 600 black leggings is confirmed: S/M/L 150/300/150 at ₹420.'})-[:IN]->(sri),
+           (:Message {id:'m-sri-2', author:'Murugan', authorKind:'supplier', at:'2026-11-04T11:32:00.000Z', card:null, text:'Received sir. Dispatch by 20 Nov.'})-[:IN]->(sri),
+           (:Message {id:'m-sri-3', author:'Murugan', authorKind:'supplier', at:'2026-11-12T16:05:00.000Z', card:null, text:'Sports bra QC started today.'})-[:IN]->(sri),
+           (:Message {id:'m-kav-1', author:'Rohan', authorKind:'person', at:'2026-11-06T10:00:00.000Z', card:null, text:'Kavya, both tank POs are confirmed. Black first please.'})-[:IN]->(kav),
+           (:Message {id:'m-kav-2', author:'Kavya', authorKind:'supplier', at:'2026-11-06T12:40:00.000Z', card:null, text:'Noted. Black tank stitching starts Monday.'})-[:IN]->(kav),
+           (:Message {id:'m-an-1', author:'Rohan', authorKind:'person', at:'2026-11-08T09:30:00.000Z', card:null, text:'Ananya, please send the olive lab dip for the tank fabric by 15 Nov.'})-[:IN]->(an),
+           (:Message {id:'m-ops-1', author:'Rohan', authorKind:'person', at:'2026-11-17T18:20:00.000Z', card:null, text:'Leggings fabric is the one to watch this week. Shuttle is checking in with Murugan tomorrow.'})-[:IN]->(ops)`);
 
   await run(`
     MATCH (d:Drop {id:'black-drop'}), (m:Message {id:'m-creators'})
@@ -168,7 +197,7 @@ async function build(name, phase) {
   for (const [label, ...props] of [["SKU", "code", "colour", "line"], ["Style", "name"], ["Supplier", "name"], ["PO", "id"], ["Creator", "handle"]]) {
     await g.createNodeFulltextIndex(label, ...props);
   }
-  for (const label of ["SKU", "Style", "Supplier", "PO", "Drop", "Creator", "Message", "Call", "Decision", "CheckIn"]) {
+  for (const label of ["SKU", "Style", "Supplier", "PO", "Drop", "Creator", "Message", "Call", "Decision", "CheckIn", "Channel"]) {
     await g.createNodeRangeIndex(label, "id");
   }
   const [{ n }] = (await g.query("MATCH (n) RETURN count(n) AS n")).data;
