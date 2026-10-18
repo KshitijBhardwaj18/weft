@@ -1,0 +1,12 @@
+# local agent tooling
+agent/
+.agents/
+.claude/
+skills-lock.json
+
+# env
+.env
+.env*.local
+
+# os
+.DS_Store
