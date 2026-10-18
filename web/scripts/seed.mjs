@@ -208,4 +208,10 @@ await build("weft", "countdown");
 await build("weft_live", "live");
 const meta = db.selectGraph("weft_meta");
 await meta.query("MERGE (s:Setting {key:'phase'}) SET s.value = 'countdown'");
+// Templates: each demo visitor's workspace is a GRAPH.COPY of these.
+for (const name of ["weft", "weft_live", "weft_meta"]) {
+  if ((await db.list()).includes(`tpl__${name}`)) await db.selectGraph(`tpl__${name}`).delete();
+  await db.selectGraph(name).copy(`tpl__${name}`);
+}
+console.log("templates: tpl__weft, tpl__weft_live, tpl__weft_meta");
 await db.close();

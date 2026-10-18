@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { q, ro } from "./graph";
+import { physical, q, ro } from "./graph";
 import { activeGraph } from "./plan";
 
 /**
@@ -71,8 +71,7 @@ export async function postMessage(input: {
     msg,
     graph,
   );
-  bus.emit(`msg:${msg.channel}`, msg);
-  bus.emit("msg:*", msg);
+  bus.emit(`msg:${await physical(msg.channel)}`, msg);
   return msg;
 }
 

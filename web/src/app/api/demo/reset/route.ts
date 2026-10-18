@@ -1,8 +1,11 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { cookies } from "next/headers";
+import { WS_COOKIE } from "@/lib/graph";
+import { resetWorkspace } from "@/lib/workspace";
 
-// Rebuilds the demo graphs from scripts/seed.mjs, so every visitor can start from the Countdown plan.
+// Puts this visitor's workspace back to the seeded demo.
 export async function POST() {
-  await promisify(execFile)(process.execPath, ["scripts/seed.mjs"], { cwd: process.cwd(), env: process.env });
+  const id = (await cookies()).get(WS_COOKIE)?.value;
+  if (!id) return Response.json({ error: "No demo workspace" }, { status: 400 });
+  await resetWorkspace(id);
   return Response.json({ ok: true });
 }
