@@ -1,6 +1,8 @@
 import Link from "next/link";
 import TopBar from "@/components/TopBar";
+import BriefCard from "@/components/BriefCard";
 import CallCard from "@/components/CallCard";
+import { sweepQuiet } from "@/lib/sweep";
 import { creators, daysBetween, drop, drops, heatmap, openCalls, phase, pos, quietCheckIns, restocks, samplesApproved, supplierRisk, totals } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,7 @@ function cellStyle(pct: number, soldOut: boolean): React.CSSProperties {
 }
 
 export default async function Today() {
+  await sweepQuiet(); // a check-in past its due date with no answer goes quiet
   const p = await phase();
   const d = await drop();
   const [calls, quiet, risk, everyPo, samples, all] = await Promise.all([openCalls(), quietCheckIns(), supplierRisk(), pos(), samplesApproved(), drops()]);
@@ -33,7 +36,7 @@ export default async function Today() {
 
   return (
     <>
-      <TopBar phase={p} />
+      <TopBar phase={p} today={d.today} />
 
       <div>
         <h1 className="h1">Good morning, Kshitij.</h1>
@@ -97,6 +100,8 @@ export default async function Today() {
           </div>
         </section>
       )}
+
+      <BriefCard day={`${p}:${d.today}`} />
 
       {next && (
         <Link href={`/drop?id=${next.id}`} className="card" style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", textDecoration: "none", color: "inherit" }}>
