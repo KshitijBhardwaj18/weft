@@ -34,7 +34,7 @@ Edges:
 | Agent tool over Cypher | Weft / Shuttle / Pattern answer by querying the graph; queries are shown in See why |
 
 ## Rules
-- Restock = ceil(rate × (leadDays + 7) − onHand − incoming, to 10), rate = sold ÷ days in stock.
+- Restock = ceil10(rate × leadDays − onHand), rate = sold ÷ days live (incoming POs and safety stock come later).
 - PO landing = fabric date + remaining stage days (cutting 2, stitching 4, QC 1 = 7 days).
 - A drop is at risk when any PO supplying it lands after the drop date; creator posts promoting it are then "broken".
 
