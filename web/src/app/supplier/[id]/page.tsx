@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import CheckInCard from "@/components/CheckInCard";
 import ChatThread from "@/components/ChatThread";
+import OneTapAnswer from "@/components/OneTapAnswer";
 import { messages, supplierChannelId } from "@/lib/chat";
 import { ro } from "@/lib/graph";
 import { activeGraph, checkInsFor, pos } from "@/lib/plan";
 
 export const dynamic = "force-dynamic";
 
-export default async function SupplierChat({ params }: { params: Promise<{ id: string }> }) {
+export default async function SupplierChat({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ checkin?: string; answer?: string }> }) {
   const { id } = await params;
+  const { checkin, answer } = await searchParams;
   const g = await activeGraph();
   const [sup] = await ro<{ name: string; type: string; city: string; leadDays: number; contact: string }>(
     "MATCH (s:Supplier {id:$id}) RETURN s.name AS name, s.type AS type, s.city AS city, s.leadDays AS leadDays, s.contact AS contact",
@@ -18,6 +20,7 @@ export default async function SupplierChat({ params }: { params: Promise<{ id: s
   if (!sup) notFound();
   const [cis, all, thread] = await Promise.all([checkInsFor(id), pos(g), messages(supplierChannelId(id))]);
   const mine = all.filter((p) => p.supplierId === id);
+  const tapped = answer === "yes" ? cis.find((c) => c.id === checkin && (c.status === "open" || c.status === "quiet")) : undefined;
 
   return (
     <>
@@ -30,6 +33,7 @@ export default async function SupplierChat({ params }: { params: Promise<{ id: s
         </div>
         <span className="chip vendor">Supplier view</span>
       </div>
+      {tapped && <OneTapAnswer checkIn={tapped.id} question={tapped.question} />}
 
       <section style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <span className="label">Purchase orders</span>
