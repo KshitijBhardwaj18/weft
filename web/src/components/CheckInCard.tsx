@@ -25,7 +25,7 @@ export default function CheckInCard({ ci }: { ci: CheckIn }) {
         <span className="row" style={{ gap: 6, fontSize: 13, fontWeight: 600, color: "var(--fathom)" }}>
           <span className="avatar av-shuttle">S</span>Shuttle · check-in
         </span>
-        <span className="mono muted" style={{ fontSize: 12 }}>{ci.po} · due {new Date(ci.due).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
+        <span className="mono muted" style={{ fontSize: 12 }}>{ci.po} · due {new Date(ci.due).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" })}</span>
       </div>
       <div style={{ fontSize: 18, fontWeight: 600 }}>{ci.question}</div>
       {done ? (

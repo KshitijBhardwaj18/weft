@@ -26,7 +26,10 @@ export default function Welcome() {
             <Link href="/login" className="btn fathom lg">Try the live demo →</Link>
             <a href="#demo" className="btn ghost lg">Watch the 4-minute demo</a>
           </div>
-          <div className="lp-shot">{/* eslint-disable-next-line @next/next/no-img-element -- a static screenshot; Workers has no image optimizer */}<img src="/screens/today-live.png" alt="Weft's Today screen: sales, restocks and the calls that need you" /></div>
+          <div className="lp-shot">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a static screenshot; Workers has no image optimizer */}
+            <img src="/screens/today-live.png" alt="Weft's Today screen: sales, restocks and the calls that need you" />
+          </div>
         </section>
       </div>
 

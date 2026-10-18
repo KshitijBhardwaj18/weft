@@ -1,5 +1,4 @@
-import { EventEmitter } from "node:events";
-import { physical, q, ro } from "./graph";
+import { q, ro } from "./graph";
 import { activeGraph } from "./plan";
 
 /**
@@ -13,9 +12,6 @@ export type Channel = { id: string; kind: ChannelKind; name: string; supplierId:
 export type AuthorKind = "person" | "supplier" | "teammate" | "system";
 export type ChatMessage = { id: string; channel: string; author: string; authorKind: AuthorKind; text: string; at: string; card: string | null };
 
-// In-process pub/sub for real-time delivery (SSE). One bus per server process.
-const g = globalThis as unknown as { __weftBus?: EventEmitter };
-export const bus: EventEmitter = (g.__weftBus ??= new EventEmitter().setMaxListeners(200));
 
 export async function channels(): Promise<Channel[]> {
   return ro<Channel>(
@@ -44,7 +40,7 @@ export async function messages(channelId: string, limit = 100): Promise<ChatMess
   );
 }
 
-/** Persist a message in the graph and push it to every open stream on that channel. */
+/** Persist a message in the graph; open chats pick it up on their next poll. */
 export async function postMessage(input: {
   channel: string;
   author: string;
@@ -71,7 +67,6 @@ export async function postMessage(input: {
     msg,
     graph,
   );
-  bus.emit(`msg:${await physical(msg.channel)}`, msg);
   return msg;
 }
 

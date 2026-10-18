@@ -1,12 +1,21 @@
 import { cookies } from "next/headers";
 import { FalkorDB } from "falkordb";
 
-// One connection per server process (survives Next.js dev hot reloads).
-const g = globalThis as unknown as { __falkor?: Promise<FalkorDB> };
+const connect = () => FalkorDB.connect({ url: process.env.FALKORDB_URL ?? "falkor://localhost:6380" });
 
-export function db(): Promise<FalkorDB> {
-  g.__falkor ??= FalkorDB.connect({ url: process.env.FALKORDB_URL ?? "falkor://localhost:6380" });
-  return g.__falkor;
+// On Node: one connection per server process (survives Next.js dev hot reloads).
+// On Cloudflare Workers a socket belongs to the request that opened it, so each request gets its own.
+const g = globalThis as unknown as { __falkor?: Promise<FalkorDB> };
+const onWorkers = globalThis.navigator?.userAgent === "Cloudflare-Workers";
+const perRequest = new WeakMap<object, Promise<FalkorDB>>();
+
+export async function db(): Promise<FalkorDB> {
+  if (!onWorkers) return (g.__falkor ??= connect());
+  const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+  const { ctx } = getCloudflareContext();
+  let c = perRequest.get(ctx);
+  if (!c) perRequest.set(ctx, (c = connect()));
+  return c;
 }
 
 export const PLAN = "weft"; // the live plan: the source of truth

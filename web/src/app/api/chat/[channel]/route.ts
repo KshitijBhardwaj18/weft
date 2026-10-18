@@ -31,7 +31,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ channel
     authorKind = "supplier";
   }
   const msg = await postMessage({ channel: id, author, authorKind, text: text.trim() });
-  // Teammates read the message after the response is sent; their replies arrive over the stream.
+  // Teammates read the message after the response is sent; their replies arrive on the chat's next poll.
   after(() => processMessage(msg).catch((e) => console.error("processMessage", e)));
   return Response.json(msg);
 }

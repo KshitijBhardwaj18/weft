@@ -7,7 +7,7 @@ import type { Lessons } from "@/lib/planning";
 type Supplier = { id: string; name: string; leadDays: number };
 type Row = { name: string; price: number; fabric: string; colours: string; units: number; supplierId: string; unitPrice: number; why: string };
 
-const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" });
 const addDays = (iso: string, n: number) => new Date(Date.parse(iso) + n * 86_400_000).toISOString().slice(0, 10);
 
 export default function PlanForm({ lessons, suppliers, today, launch }: { lessons: Lessons; suppliers: Supplier[]; today: string; launch: string }) {

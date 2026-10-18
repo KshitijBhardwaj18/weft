@@ -10,7 +10,7 @@ type Card = { type?: string; teamOnly?: boolean; trace?: { why: string; query: s
 const AV: Record<string, string> = { Weft: "av-weft", Shuttle: "av-shuttle", Pattern: "av-pattern" };
 const time = (iso: string) => {
   const d = new Date(iso);
-  return isNaN(+d) ? "" : d.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  return isNaN(+d) ? "" : d.toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
 };
 const parse = (c: string | null): Card => {
   try { return c ? JSON.parse(c) : {}; } catch { return {}; }
@@ -39,18 +39,25 @@ export default function ChatThread({ channel, initial, viewer = "team", placehol
   const end = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Polling, not a socket: on Workers every request may land on a different isolate. Faster while a teammate is answering.
+  const seen = useRef(new Set(initial.map((m) => m.id)));
   useEffect(() => {
-    const es = new EventSource(`/api/chat/${channel}/stream`);
-    es.onmessage = (e) => {
-      const m = JSON.parse(e.data) as Msg;
-      setMsgs((cur) => (cur.some((x) => x.id === m.id) ? cur : [...cur, m]));
-      if (m.authorKind === "teammate") {
+    let alive = true;
+    const tick = async () => {
+      const res = await fetch(`/api/chat/${channel}`, { cache: "no-store" }).catch(() => null);
+      if (!alive || !res?.ok) return;
+      const fresh = ((await res.json()) as Msg[]).filter((m) => !seen.current.has(m.id));
+      if (!fresh.length) return;
+      fresh.forEach((m) => seen.current.add(m.id));
+      setMsgs((cur) => [...cur, ...fresh.filter((m) => !cur.some((x) => x.id === m.id))]);
+      if (fresh.some((m) => m.authorKind === "teammate")) {
         setThinking(false);
         router.refresh(); // a teammate may have changed the plan; refresh server-rendered panels
       }
     };
-    return () => es.close();
-  }, [channel, router]);
+    const id = setInterval(tick, thinking ? 1500 : 4000);
+    return () => { alive = false; clearInterval(id); };
+  }, [channel, router, thinking]);
 
   useEffect(() => {
     end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -64,7 +71,10 @@ export default function ChatThread({ channel, initial, viewer = "team", placehol
     setText("");
     const res = await fetch(`/api/chat/${channel}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: t, as: viewer }) });
     const m = (await res.json()) as Msg;
-    if (m.id) setMsgs((cur) => (cur.some((x) => x.id === m.id) ? cur : [...cur, m]));
+    if (m.id) {
+      seen.current.add(m.id);
+      setMsgs((cur) => (cur.some((x) => x.id === m.id) ? cur : [...cur, m]));
+    }
     if (waitsForTeammate || /@(weft|shuttle|pattern)\b/i.test(t)) setThinking(true);
     setBusy(false);
   }
