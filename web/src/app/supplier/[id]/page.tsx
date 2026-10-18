@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import CheckInCard from "@/components/CheckInCard";
+import ChatThread from "@/components/ChatThread";
+import { messages, supplierChannelId } from "@/lib/chat";
 import { ro } from "@/lib/graph";
 import { activeGraph, checkInsFor, pos } from "@/lib/plan";
 
@@ -14,7 +16,7 @@ export default async function SupplierChat({ params }: { params: Promise<{ id: s
     g,
   );
   if (!sup) notFound();
-  const [cis, all] = await Promise.all([checkInsFor(id), pos(g)]);
+  const [cis, all, thread] = await Promise.all([checkInsFor(id), pos(g), messages(supplierChannelId(id))]);
   const mine = all.filter((p) => p.supplierId === id);
 
   return (
@@ -51,6 +53,11 @@ export default async function SupplierChat({ params }: { params: Promise<{ id: s
           {cis.map((c) => <CheckInCard key={c.id} ci={c} />)}
         </section>
       )}
+
+      <section style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 760 }}>
+        <span className="label">Chat with Weft Active</span>
+        <ChatThread channel={supplierChannelId(id)} initial={thread} viewer="supplier" placeholder={`Message the Weft Active team as ${sup.contact}…`} />
+      </section>
     </>
   );
 }

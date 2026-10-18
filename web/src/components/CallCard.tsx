@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import type { Call } from "@/lib/plan";
 
 const AV: Record<string, string> = { Weft: "av-weft", Shuttle: "av-shuttle", Pattern: "av-pattern" };
@@ -11,9 +11,11 @@ const PRIMARY: Record<string, string> = { delay: "Accept new date", restock: "Ap
 export default function CallCard({ call }: { call: Call }) {
   const router = useRouter();
   const [busy, start] = useTransition();
+  const [err, setErr] = useState("");
   const act = (action: "apply" | "ignore") =>
     start(async () => {
-      await fetch(`/api/calls/${call.id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action }) });
+      const res = await fetch(`/api/calls/${call.id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action }) });
+      if (!res.ok) return setErr((await res.json()).error ?? "Couldn't do that.");
       router.refresh();
     });
 
@@ -29,6 +31,7 @@ export default function CallCard({ call }: { call: Call }) {
         <button className="btn quiet sm" disabled={busy} onClick={() => act("ignore")}>Ignore</button>
         <button className="btn quiet sm" onClick={() => window.dispatchEvent(new CustomEvent("weft:ask", { detail: { q: `Why did ${call.teammate} raise this: ${call.title}?` } }))}>See why</button>
       </div>
+      {err && <div style={{ fontSize: 13, color: "var(--pulse)" }}>{err}</div>}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ActingAs from "./ActingAs";
 
 const I = {
   today: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>,
@@ -13,7 +14,6 @@ const I = {
   map: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="5" cy="12" r="2.5" /><circle cx="19" cy="5" r="2.5" /><circle cx="19" cy="19" r="2.5" /><path d="M7.3 11l9.4-4.8M7.3 13l9.4 4.8" /></svg>,
 };
 
-const ask = (who: string) => () => window.dispatchEvent(new CustomEvent("weft:ask", { detail: { who } }));
 
 export default function Sidebar() {
   const path = usePathname();
@@ -57,19 +57,21 @@ export default function Sidebar() {
 
       <div className="group">
         <div className="group-label">Conversations</div>
-        <button className="nav-sub" style={{ border: "none", background: "none", textAlign: "left" }} onClick={ask("Weft")}><span className="avatar av-weft">W</span>Weft<span className="meta" style={{ marginLeft: "auto", fontSize: 11 }}>Chief of staff</span></button>
-        <button className="nav-sub" style={{ border: "none", background: "none", textAlign: "left" }} onClick={ask("Shuttle")}><span className="avatar av-shuttle">S</span>Shuttle<span style={{ marginLeft: "auto", fontSize: 11 }}>Production</span></button>
-        <button className="nav-sub" style={{ border: "none", background: "none", textAlign: "left" }} onClick={ask("Pattern")}><span className="avatar av-pattern">P</span>Pattern<span style={{ marginLeft: "auto", fontSize: 11 }}>Sales</span></button>
-        <div style={{ height: 6 }} />
-        <Link href="/supplier/sri" className={`nav-sub${path === "/supplier/sri" ? " on" : ""}`}><span className="sq" />Sri Lakshmi Knits</Link>
-        <Link href="/supplier/kavya" className={`nav-sub${path === "/supplier/kavya" ? " on" : ""}`}><span className="sq" />Kavya Garments</Link>
-        <Link href="/supplier/ananya" className={`nav-sub${path === "/supplier/ananya" ? " on" : ""}`}><span className="sq" />Ananya Fabrics</Link>
+        <div className="muted" style={{ fontSize: 12, padding: "2px 12px" }}>Suppliers</div>
+        {[["sup-sri", "Sri Lakshmi Knits"], ["sup-kavya", "Kavya Garments"], ["sup-ananya", "Ananya Fabrics"]].map(([id, name]) => (
+          <Link key={id} href={`/chat/${id}`} className={`nav-sub${path === `/chat/${id}` ? " on" : ""}`}><span className="sq" />{name}</Link>
+        ))}
+        <div className="muted" style={{ fontSize: 12, padding: "8px 12px 2px" }}>Team</div>
+        {[["team-ops", "ops"], ["team-marketing", "marketing"]].map(([id, name]) => (
+          <Link key={id} href={`/chat/${id}`} className={`nav-sub${path === `/chat/${id}` ? " on" : ""}`}><span style={{ width: 18, textAlign: "center" }}>#</span>{name}</Link>
+        ))}
+        <div className="muted" style={{ fontSize: 12, padding: "8px 12px 2px" }}>AI teammates</div>
+        {[["agent-weft", "Weft", "av-weft", "Chief of staff"], ["agent-shuttle", "Shuttle", "av-shuttle", "Production"], ["agent-pattern", "Pattern", "av-pattern", "Sales"]].map(([id, name, av, role]) => (
+          <Link key={id} href={`/chat/${id}`} className={`nav-sub${path === `/chat/${id}` ? " on" : ""}`}><span className={`avatar ${av}`}>{name[0]}</span>{name}<span style={{ marginLeft: "auto", fontSize: 11 }}>{role}</span></Link>
+        ))}
       </div>
 
-      <div style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: 10, padding: "12px 10px 4px", borderTop: "1px solid var(--line)" }}>
-        <span style={{ width: 28, height: 28, borderRadius: 8, background: "var(--ink)", color: "var(--surface)", fontSize: 13, fontWeight: 700, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>K</span>
-        <span style={{ display: "flex", flexDirection: "column" }}><span style={{ fontSize: 14, fontWeight: 600 }}>Kshitij</span><span className="muted" style={{ fontSize: 12 }}>Owner</span></span>
-      </div>
+      <ActingAs />
     </nav>
   );
 }
