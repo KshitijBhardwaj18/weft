@@ -87,7 +87,13 @@ export default function AskPanel() {
                 <span className={`avatar ${AV[a.teammate ?? "Weft"]}`} style={{ width: 28, height: 28, fontSize: 16 }}>{(a.teammate ?? "W")[0]}</span>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
                   <div style={{ fontSize: 13 }}><b>{a.teammate}</b> <span className="muted">{a.teammate === "Pattern" ? "Sales analyst" : a.teammate === "Shuttle" ? "Production lead" : "Chief of staff"}</span></div>
-                  <div className="bubble">{a.answer}</div>
+                  <div className="bubble">
+                    {a.answer.split(/(\*\*[^*]+\*\*|\[[A-Za-z0-9_-]+\])/g).map((part, k) =>
+                      part.startsWith("**") ? <strong key={k}>{part.slice(2, -2)}</strong>
+                      : /^\[[A-Za-z0-9_-]+\]$/.test(part) ? <span key={k} className="chip po" style={{ padding: "0 6px", fontSize: 11, verticalAlign: "1px" }}>{part.slice(1, -1)}</span>
+                      : part,
+                    )}
+                  </div>
                   <div className="row">
                     <button className="btn dawn sm" onClick={() => setWhy(why === i ? null : i)}>See why · {a.trace?.length ?? 0} queries</button>
                     {!!a.ids?.length && <Link className="btn ghost sm" href={`/map?focus=${encodeURIComponent(a.ids.join(","))}`} onClick={() => setOpen(false)}>Show on Brand map</Link>}
