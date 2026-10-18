@@ -1,5 +1,5 @@
 import { q } from "@/lib/graph";
-import { activeGraph, daysBetween, impactOf } from "@/lib/plan";
+import { activeGraph, daysBetween, drop, impactOf } from "@/lib/plan";
 
 const REMAINING_STAGE_DAYS = 7; // cutting 2 + stitching 4 + QC 1, after fabric lands
 const addDays = (iso: string, n: number) => new Date(Date.parse(iso) + n * 86_400_000).toISOString().slice(0, 10);
@@ -44,7 +44,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
      CREATE (c:Call {id:'call-delay-' + $po, kind:'delay', status:'open', at:$at, newEta:$lands,
                      title:'Supplier says fabric is delayed', summary:$summary})-[:ABOUT]->(po),
             (c)-[:RAISED_BY]->(s), (c)-[:SOURCED_FROM]->(ci)`,
-    { po: ci.po, id, date, lands, summary, at: new Date().toISOString() },
+    { po: ci.po, id, date, lands, summary, at: `${(await drop(g)).today}T10:42` },
     g,
   );
   return Response.json({ ok: true, summary });
