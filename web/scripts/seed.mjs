@@ -2,8 +2,8 @@
 // and a Live day-9 snapshot (graph `weft_live`). Run: pnpm seed
 import { FalkorDB } from "falkordb";
 
-const url = process.env.FALKORDB_URL ?? "falkor://localhost:6380";
-const db = await FalkorDB.connect({ url });
+// Also imported by the Cloudflare Worker, which reseeds an empty database on its own (see worker.ts).
+let db;
 
 const STYLES = [
   { id: "leggings", name: "Core Leggings", price: 2499, fabric: "Nylon-spandex 78/22, 260 GSM, 4-way stretch" },
@@ -204,14 +204,23 @@ async function build(name, phase) {
   console.log(`${name}: ${n} nodes (${phase})`);
 }
 
-await build("weft", "countdown");
-await build("weft_live", "live");
-const meta = db.selectGraph("weft_meta");
-await meta.query("MERGE (s:Setting {key:'phase'}) SET s.value = 'countdown'");
-// Templates: each demo visitor's workspace is a GRAPH.COPY of these.
-for (const name of ["weft", "weft_live", "weft_meta"]) {
-  if ((await db.list()).includes(`tpl__${name}`)) await db.selectGraph(`tpl__${name}`).delete();
-  await db.selectGraph(name).copy(`tpl__${name}`);
+export async function seed(conn) {
+  db = conn;
+  await build("weft", "countdown");
+  await build("weft_live", "live");
+  const meta = db.selectGraph("weft_meta");
+  await meta.query("MERGE (s:Setting {key:'phase'}) SET s.value = 'countdown'");
+  // Templates: each demo visitor's workspace is a GRAPH.COPY of these.
+  for (const name of ["weft", "weft_live", "weft_meta"]) {
+    if ((await db.list()).includes(`tpl__${name}`)) await db.selectGraph(`tpl__${name}`).delete();
+    await db.selectGraph(name).copy(`tpl__${name}`);
+  }
+  console.log("templates: tpl__weft, tpl__weft_live, tpl__weft_meta");
 }
-console.log("templates: tpl__weft, tpl__weft_live, tpl__weft_meta");
-await db.close();
+
+// CLI: pnpm seed
+if (process.argv?.[1] && import.meta.url === `file://${process.argv[1]}`) {
+  const conn = await FalkorDB.connect({ url: process.env.FALKORDB_URL ?? "falkor://localhost:6380" });
+  await seed(conn);
+  await conn.close();
+}
