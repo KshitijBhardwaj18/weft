@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { supplierFromCookie, validSupplierToken } from "@/lib/supplier-access";
 
 // The team sits behind the demo login. Suppliers get in with a signed link to their own view only.
-const PUBLIC = ["/welcome", "/login", "/api/login", "/api/integrations"];
+const PUBLIC = ["/welcome", "/login", "/api/login", "/api/integrations", "/api/health"];
 
 export async function middleware(req: NextRequest) {
   const { pathname, searchParams } = req.nextUrl;
