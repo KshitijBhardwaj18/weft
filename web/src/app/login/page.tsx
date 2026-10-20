@@ -25,7 +25,8 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
             <input id="email" name="email" type="email" className="input" defaultValue={DEMO_EMAIL} required />
             <label htmlFor="password" className="muted" style={{ fontSize: 13 }}>Password</label>
             <input id="password" name="password" type="password" className="input" defaultValue={DEMO_PASSWORD} required />
-            {error && <div style={{ color: "var(--pulse)", fontSize: 13 }}>That isn&apos;t the demo login. Use the credentials above.</div>}
+            {error === "down" && <div style={{ color: "var(--pulse)", fontSize: 13 }}>The demo database is waking up. Please try again in a minute.</div>}
+            {error && error !== "down" && <div style={{ color: "var(--pulse)", fontSize: 13 }}>That isn&apos;t the demo login. Use the credentials above.</div>}
             <button className="btn fathom lg" style={{ justifyContent: "center", marginTop: 6 }}>Sign in and take the tour</button>
           </form>
         </div>

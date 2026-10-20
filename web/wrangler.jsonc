@@ -3,16 +3,18 @@
   // ANTHROPIC_API_KEY and SESSION_SECRET with `wrangler secret put` (per environment).
   // Default target is the preview Worker on workers.dev; `--env production` serves weft.kshitijbhardwaj.space.
   "name": "weft-next",
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "workers_dev": true,
+  "triggers": { "crons": ["*/10 * * * *"] },
   "observability": { "enabled": true },
   "env": {
     "production": {
       "name": "weft",
-      "routes": [{ "pattern": "weft.kshitijbhardwaj.space", "custom_domain": true }]
+      "routes": [{ "pattern": "weft.kshitijbhardwaj.space", "custom_domain": true }],
+      "triggers": { "crons": ["*/10 * * * *"] }
     }
   }
 }
